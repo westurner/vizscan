@@ -4,6 +4,7 @@ from typing import List, Dict, Optional
 from .constants import TOOL_ID, PES_URI
 from .static import RiskEvent, QualityReport
 
+
 @dataclass
 class HybridReport:
     filepath: str
@@ -32,12 +33,14 @@ def generate_earl(reports: List[HybridReport]) -> Dict:
 
         errors = []
         for e in r.static_events + r.dynamic_events:
-            errors.append({
-                "pes:rule": e.rule_id,
-                "pes:level": e.risk_level.value,
-                "dct:description": e.context,
-                "pes:line": e.line
-            })
+            errors.append(
+                {
+                    "pes:rule": e.rule_id,
+                    "pes:level": e.risk_level.value,
+                    "dct:description": e.context,
+                    "pes:line": e.line,
+                }
+            )
 
         result = {
             "@type": "earl:TestResult",
@@ -60,4 +63,6 @@ def generate_earl(reports: List[HybridReport]) -> Dict:
         "@context": {
             "earl": "http://www.w3.org/ns/earl#",
             "pes": PES_URI,
-        }, "@graph": graph}
+        },
+        "@graph": graph,
+    }

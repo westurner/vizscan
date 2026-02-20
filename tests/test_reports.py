@@ -1,4 +1,3 @@
-import pytest
 from vizscan.reports import generate_earl, HybridReport
 from vizscan.static import RiskEvent, RiskLevel
 

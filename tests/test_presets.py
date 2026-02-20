@@ -1,6 +1,5 @@
-import pytest
 import os
-from vizscan.static import scan_file_full, RiskLevel
+from vizscan.static import scan_file_full
 
 PRESETS_DIR = os.path.join(os.path.dirname(__file__), "presets")
 
@@ -25,9 +24,9 @@ def verify_preset(filename):
         found_counts[e.rule_id] = found_counts.get(e.rule_id, 0) + 1
 
     for rule_id, expected_count in metadata.items():
-        assert (
-            found_counts.get(rule_id, 0) == expected_count
-        ), f"Expected {expected_count} events for {rule_id} in {filename}, found {found_counts.get(rule_id, 0)}"
+        assert found_counts.get(rule_id, 0) == expected_count, (
+            f"Expected {expected_count} events for {rule_id} in {filename}, found {found_counts.get(rule_id, 0)}"
+        )
 
 
 def test_static_ban():

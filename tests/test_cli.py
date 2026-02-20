@@ -1,7 +1,5 @@
 import sys
-from unittest.mock import patch, MagicMock
-import runpy
-import os
+from unittest.mock import patch
 import pytest
 from vizscan.cli import (
     main,

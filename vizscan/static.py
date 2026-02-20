@@ -3,7 +3,7 @@ import re
 import enum
 import argparse
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Any, Optional
+from typing import List, Dict, Tuple, Optional
 
 # --- UI HANDLING ---
 try:
@@ -21,6 +21,7 @@ except ImportError:
 # ==========================================
 # 1. ONTOLOGY & REGISTRY
 # ==========================================
+
 
 class RiskLevel(str, enum.Enum):
     INFO = "INFO"
@@ -80,7 +81,9 @@ class SafetyRegistry:
                 "dct:description": r.description,
                 "pes:score": r.base_score,
                 "pes:level": r.level,
-                "pes:reasons": [{"name": reason.name, "url": reason.url} for reason in r.reasons]
+                "pes:reasons": [
+                    {"name": reason.name, "url": reason.url} for reason in r.reasons
+                ],
             }
             for r in self.rules.values()
         ]
@@ -88,28 +91,58 @@ class SafetyRegistry:
 
 REGISTRY = SafetyRegistry()
 REGISTRY.register(
-    "InverterStrobe", "Hard Strobe", "val = 1 - val (30Hz strobe)", 150, RiskLevel.BAN,
-    reasons=[Reason(name="ITU-R BT.1702 (rapid alternating light/dark frames exceeding safe flash threshold)", url="https://www.itu.int/rec/R-REC-BT.1702/en")]
+    "InverterStrobe",
+    "Hard Strobe",
+    "val = 1 - val (30Hz strobe)",
+    150,
+    RiskLevel.BAN,
+    reasons=[
+        Reason(
+            name="ITU-R BT.1702 (rapid alternating light/dark frames exceeding safe flash threshold)",
+            url="https://www.itu.int/rec/R-REC-BT.1702/en",
+        )
+    ],
 )
 REGISTRY.register(
-    "FrameModulo", "Frame Modulo", "frame % N (Rapid flicker)", 100, RiskLevel.CRITICAL,
+    "FrameModulo",
+    "Frame Modulo",
+    "frame % N (Rapid flicker)",
+    100,
+    RiskLevel.CRITICAL,
     reasons=[
         Reason(name="ITU-R BT.1702", url="https://www.itu.int/rec/R-REC-BT.1702/en"),
-        Reason(name="WCAG 2.1 General Flash Threshold (>3Hz)", url="https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold")
-    ]
+        Reason(
+            name="WCAG 2.1 General Flash Threshold (>3Hz)",
+            url="https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold",
+        ),
+    ],
 )
 REGISTRY.register(
-    "HighFreqOsc", "High Frequency", "Oscillation > 3Hz", 40, RiskLevel.WARNING,
+    "HighFreqOsc",
+    "High Frequency",
+    "Oscillation > 3Hz",
+    40,
+    RiskLevel.WARNING,
     reasons=[
         Reason(name="ITU-R BT.1702", url="https://www.itu.int/rec/R-REC-BT.1702/en"),
-        Reason(name="WCAG 2.1 General Flash Threshold", url="https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold"),
-    ]
+        Reason(
+            name="WCAG 2.1 General Flash Threshold",
+            url="https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold",
+        ),
+    ],
 )
 REGISTRY.register(
-    "TanColor", "Tangent Color", "Tan() on color (Flash Risk)", 60, RiskLevel.CRITICAL,
+    "TanColor",
+    "Tangent Color",
+    "Tan() on color (Flash Risk)",
+    60,
+    RiskLevel.CRITICAL,
     reasons=[
-        Reason(name="ITU-R BT.1702 (high-contrast luminance transitions)", url="https://www.itu.int/rec/R-REC-BT.1702/en")
-    ]
+        Reason(
+            name="ITU-R BT.1702 (high-contrast luminance transitions)",
+            url="https://www.itu.int/rec/R-REC-BT.1702/en",
+        )
+    ],
 )
 REGISTRY.register(
     "TanMotion",
@@ -117,7 +150,12 @@ REGISTRY.register(
     "Tan() on geometry (Disorientation Risk)",
     30,
     RiskLevel.WARNING,
-    reasons=[Reason(name="ITU-R BT.1702 (provocative spatial patterns and disorientation)", url="https://www.itu.int/rec/R-REC-BT.1702/en")]
+    reasons=[
+        Reason(
+            name="ITU-R BT.1702 (provocative spatial patterns and disorientation)",
+            url="https://www.itu.int/rec/R-REC-BT.1702/en",
+        )
+    ],
 )
 REGISTRY.register(
     "StepFunction",
@@ -125,7 +163,12 @@ REGISTRY.register(
     "Step/Fract function creating instant on/off",
     50,
     RiskLevel.WARNING,
-    reasons=[Reason(name="ITU-R BT.1702 (high-contrast luminance transitions)", url="https://www.itu.int/rec/R-REC-BT.1702/en")]
+    reasons=[
+        Reason(
+            name="ITU-R BT.1702 (high-contrast luminance transitions)",
+            url="https://www.itu.int/rec/R-REC-BT.1702/en",
+        )
+    ],
 )
 
 # ==========================================
@@ -737,6 +780,7 @@ def main():
         print("\nQuality Report:")
         print(f"  Background: {quality.background_type}")
         print(f"  Attributes: {', '.join(quality.attributes)}")
+
 
 if __name__ == "__main__":
     main()

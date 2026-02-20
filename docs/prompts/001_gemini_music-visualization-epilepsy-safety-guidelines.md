@@ -153,10 +153,10 @@ void main() {
     if (abs(diff) > u_SafeDelta) {
         // Calculate the maximum safe luminance for this frame
         float targetLuma = lumaPrev + sign(diff) * u_SafeDelta;
-        
+
         // Scale the pixel color to match the safe luminance
         // (Prevent div by zero with 0.0001)
-        float scale = targetLuma / (lumaCur + 0.0001); 
+        float scale = targetLuma / (lumaCur + 0.0001);
         current.rgb *= scale;
     }
 
@@ -285,7 +285,7 @@ void main() {
 
     // 1. Red Dampener (Desaturate dangerous red flashes)
     if (current.r > 0.8 && current.g < 0.2 && current.b < 0.2) {
-        current.rgb = mix(current.rgb, vec3(current.r * 0.5), 0.5); 
+        current.rgb = mix(current.rgb, vec3(current.r * 0.5), 0.5);
     }
 
     // 2. Temporal Luminance Limiter
@@ -297,9 +297,9 @@ void main() {
     if (abs(diff) > u_SafeDelta) {
         // Clamp to maximum safe step
         float targetLuma = lumaPrev + sign(diff) * u_SafeDelta;
-        
+
         // Apply scaling to RGB to maintain color, just darker/lighter
-        float scale = targetLuma / (lumaCur + 0.0001); 
+        float scale = targetLuma / (lumaCur + 0.0001);
         current.rgb *= scale;
     }
 
@@ -380,7 +380,7 @@ void main() {
 
     // 1. Red Dampener (Desaturate dangerous red flashes)
     if (current.r > 0.8 && current.g < 0.2 && current.b < 0.2) {
-        current.rgb = mix(current.rgb, vec3(current.r * 0.5), 0.5); 
+        current.rgb = mix(current.rgb, vec3(current.r * 0.5), 0.5);
     }
 
     // 2. Temporal Luminance Limiter
@@ -392,9 +392,9 @@ void main() {
     if (abs(diff) > u_SafeDelta) {
         // Clamp to maximum safe step
         float targetLuma = lumaPrev + sign(diff) * u_SafeDelta;
-        
+
         // Apply scaling to RGB to maintain color, just darker/lighter
-        float scale = targetLuma / (lumaCur + 0.0001); 
+        float scale = targetLuma / (lumaCur + 0.0001);
         current.rgb *= scale;
     }
 
@@ -475,7 +475,7 @@ void main() {
 
     // 1. Red Dampener (Desaturate dangerous red flashes)
     if (current.r > 0.8 && current.g < 0.2 && current.b < 0.2) {
-        current.rgb = mix(current.rgb, vec3(current.r * 0.5), 0.5); 
+        current.rgb = mix(current.rgb, vec3(current.r * 0.5), 0.5);
     }
 
     // 2. Temporal Luminance Limiter
@@ -487,9 +487,9 @@ void main() {
     if (abs(diff) > u_SafeDelta) {
         // Clamp to maximum safe step
         float targetLuma = lumaPrev + sign(diff) * u_SafeDelta;
-        
+
         // Apply scaling to RGB to maintain color, just darker/lighter
-        float scale = targetLuma / (lumaCur + 0.0001); 
+        float scale = targetLuma / (lumaCur + 0.0001);
         current.rgb *= scale;
     }
 
@@ -569,9 +569,9 @@ def is_dangerous(file_content):
     Analyzes the content of a .milk file for seizure triggers.
     Returns: (bool, reason_string)
     """
-    # We generally only care about the 'per_frame' block, 
+    # We generally only care about the 'per_frame' block,
     # but scanning the whole file is safer and simpler for this script.
-    
+
     # Check 1: Inverter Strobe (The "Hard" Strobe)
     # logic: if a color variable is set to 1 - itself
     inverter_matches = INVERT_PATTERN.findall(file_content)
@@ -603,7 +603,7 @@ def is_dangerous(file_content):
 
 def scan_and_prune(directory, dry_run=False):
     quarantine_dir = os.path.join(directory, "quarantine_photosensitive")
-    
+
     if not dry_run and not os.path.exists(quarantine_dir):
         os.makedirs(quarantine_dir)
 
@@ -611,27 +611,27 @@ def scan_and_prune(directory, dry_run=False):
     print(f"Scanning {len(files)} presets in {directory}...\n")
 
     moved_count = 0
-    
+
     for filename in files:
         filepath = os.path.join(directory, filename)
-        
+
         try:
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
-            
+
             dangerous, reason = is_dangerous(content)
-            
+
             if dangerous:
                 print(f"[FLAGGED] {filename}")
                 print(f"    Reason: {reason}")
-                
+
                 if not dry_run:
                     dest = os.path.join(quarantine_dir, filename)
                     shutil.move(filepath, dest)
                     print("    -> Moved to quarantine.")
-                
+
                 moved_count += 1
-                
+
         except Exception as e:
             print(f"Error reading {filename}: {e}")
 
@@ -646,9 +646,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prune epilepsy-inducing projectM presets.")
     parser.add_argument("directory", help="Path to the folder containing .milk files")
     parser.add_argument("--dry-run", action="store_true", help="Scan without moving files")
-    
+
     args = parser.parse_args()
-    
+
     if os.path.isdir(args.directory):
         scan_and_prune(args.directory, args.dry_run)
     else:
@@ -711,7 +711,7 @@ def is_dangerous(file_content):
     Analyzes the content of a .milk file for seizure triggers.
     Returns: (bool, reason_string)
     """
-    
+
     # Check 1: Inverter Strobe (The "Hard" Strobe)
     inverter_matches = INVERT_PATTERN.findall(file_content)
     for var in inverter_matches:
@@ -731,11 +731,11 @@ def is_dangerous(file_content):
     # Check 3: Frame Modulo (Frame skipping strobes)
     mod_matches = MOD_PATTERN.findall(file_content)
     for var, mod_val in mod_matches:
-        if int(mod_val) < 4: 
+        if int(mod_val) < 4:
             return True, f"Low-interval Frame Modulo ({var} % {mod_val})"
 
     # --- MISSING CHECK ADDED BELOW ---
-    
+
     # Check 4: Tangent Flashing (Asymptotic spikes)
     # Tangent functions cause values to shoot to infinity, causing sudden white-outs.
     if TAN_PATTERN.search(file_content):
@@ -772,7 +772,7 @@ from typing import List, Tuple
 # --- CONFIGURATION & WEIGHTS ---
 
 # Threshold: If a preset scores higher than this, it is quarantined.
-RISK_THRESHOLD = 100 
+RISK_THRESHOLD = 100
 
 # Variables that control light/color (High Photosensitivity Risk)
 COLOR_VARS = {
@@ -815,20 +815,20 @@ def analyze_tan_usage(line: str) -> List[RiskEvent]:
     the variable being assigned.
     """
     events = []
-    
+
     # Check if tan() is present
     if 'tan' in line and '(' in line:
         # Does this line assign to a variable?
         match = TAN_ASSIGNMENT_PATTERN.search(line)
-        
+
         if match:
             variable = match.group(1)
-            
+
             if variable in COLOR_VARS:
                 # CRITICAL: Tangent applied to light/color (Explosive white-outs)
                 events.append(RiskEvent(
                     name="TanColorRisk",
-                    score=60, 
+                    score=60,
                     context=f"{variable} driven by tan() -> Risk of luminance flash"
                 ))
             elif variable in MOTION_VARS:
@@ -852,7 +852,7 @@ def analyze_tan_usage(line: str) -> List[RiskEvent]:
                 score=10,
                 context="Unassigned tan() usage"
             ))
-            
+
     return events
 
 def score_preset(file_content: str) -> Tuple[int, List[RiskEvent]]:
@@ -906,18 +906,18 @@ def process_directory(directory, dry_run=False):
     for filename in os.listdir(directory):
         if not filename.endswith('.milk'):
             continue
-            
+
         filepath = os.path.join(directory, filename)
         try:
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
-            
+
             score, events = score_preset(content)
-            
+
             status = "SAFE"
             if score >= RISK_THRESHOLD:
                 status = "UNSAFE"
-            
+
             # Print Summary
             if score > 0:
                 print(f"{filename[:38]:<40} | {score:<5} | {status}")
@@ -938,9 +938,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Score projectM presets for epilepsy risk.")
     parser.add_argument("directory", help="Path to presets")
     parser.add_argument("--dry-run", action="store_true", help="Do not move files")
-    
+
     args = parser.parse_args()
-    
+
     if os.path.isdir(args.directory):
         process_directory(args.directory, args.dry_run)
 ```
@@ -1149,7 +1149,7 @@ def score_file(filepath: str) -> Optional[PresetReport]:
 
     filename = os.path.basename(filepath)
     report = PresetReport(filename=filename, filepath=filepath)
-    
+
     # 1. Inverter Strobe
     for var in INVERT_RE.findall(content):
         if var in COLOR_VARS:
@@ -1172,7 +1172,7 @@ def score_file(filepath: str) -> Optional[PresetReport]:
     # Calculate Totals
     report.total_score = sum(e.score for e in report.events)
     report.is_safe = report.total_score < RISK_THRESHOLD
-    
+
     return report
 
 # ==========================================
@@ -1221,7 +1221,7 @@ def main():
                         target_files.append(os.path.join(root, f))
         else:
             target_files = [os.path.join(args.path, f) for f in os.listdir(args.path) if f.endswith(".milk")]
-    
+
     # Run Analysis
     summary = ScanSummary(
         analyzedAt=datetime.datetime.now().isoformat(),
@@ -1229,14 +1229,14 @@ def main():
     )
 
     print(f"Scanning {len(target_files)} files...", file=sys.stderr)
-    
+
     for fpath in target_files:
         report = score_file(fpath)
         if report:
             summary.reports.append(report)
             if not report.is_safe:
                 summary.unsafe_files += 1
-    
+
     summary.total_files = len(summary.reports)
 
     # Construct JSON-LD Output
@@ -1334,10 +1334,10 @@ ___
 ### chat-10
 
 > Improve the API for adding a RiskEvent to the SCORING_ONTOLOGY and to the events:list
-> 
-> 
-> 
-> 
+>
+>
+>
+>
 > Change the schema uri from `pms` to `pes`: "pes": "https://pes-schema.local/pes-schema#"
 
 This script improves the internal API by making the **Scoring Ontology** the single source of truth. Instead of manually typing scores and URIs in the detection logic, you now query a registry. This ensures that if you update a score in the schema, it automatically propagates to the scanner logic.
@@ -1438,7 +1438,7 @@ class ScoringRegistry:
         if key not in self._rules:
             # Fallback for unregistered rules to prevent crashing
             return RiskEvent(f"pes:UnknownRule_{key}", 0, context)
-        
+
         rule = self._rules[key]
         return RiskEvent(rule_ref=rule.uri, score=rule.score, context=context)
 
@@ -1524,7 +1524,7 @@ def score_file(filepath: str) -> Optional[PresetReport]:
 
     filename = os.path.basename(filepath)
     report = PresetReport(filename=filename, filepath=filepath)
-    
+
     # 1. Inverter Strobe
     for var in INVERT_RE.findall(content):
         if var in COLOR_VARS:
@@ -1547,7 +1547,7 @@ def score_file(filepath: str) -> Optional[PresetReport]:
     # Finalize
     report.total_score = sum(e.score for e in report.events)
     report.is_safe = report.total_score < RISK_THRESHOLD
-    
+
     return report
 
 # ==========================================
@@ -1560,7 +1560,7 @@ def main():
     parser.add_argument("-r", "--recursive", action="store_true", help="Scan recursively")
     parser.add_argument("-o", "--output", default="report.jsonld", help="Output JSON-LD file")
     parser.add_argument("--help-scoring", action="store_true", help="Show scoring rules")
-    
+
     args = parser.parse_args()
 
     if args.help_scoring:
@@ -1592,7 +1592,7 @@ def main():
             summary.reports.append(report)
             if not report.is_safe:
                 summary.unsafe_files += 1
-    
+
     summary.total_files = len(summary.reports)
 
     # Build Final JSON-LD
@@ -1610,7 +1610,7 @@ def main():
 
     with open(args.output, 'w', encoding='utf-8') as f:
         json.dump(final_output, f, indent=2)
-    
+
     print(f"Report written to {args.output}")
 
 if __name__ == "__main__":
@@ -1718,15 +1718,15 @@ class ScoringRegistry:
     def create_event(self, key: str, context: str, line_no: int, terms: List[str] = None) -> RiskEvent:
         if terms is None:
             terms = []
-        
+
         if key not in self._rules:
             # Fallback for safe failure
             return RiskEvent(f"pes:UnknownRule_{key}", 0, context, line_no, terms)
-        
+
         rule = self._rules[key]
         return RiskEvent(
-            rule_ref=rule.uri, 
-            score=rule.score, 
+            rule_ref=rule.uri,
+            score=rule.score,
             context=context,
             location=line_no,
             term_vectors=terms
@@ -1776,7 +1776,7 @@ class PresetReport:
 
 def analyze_line(line: str, line_no: int, report: PresetReport):
     """Parses a single line against all rules."""
-    
+
     # 1. Inverter Strobe: "ob_r = 1 - ob_r"
     # Logic: Look for exact pattern
     inv_matches = INVERT_RE.findall(line)
@@ -1813,7 +1813,7 @@ def analyze_line(line: str, line_no: int, report: PresetReport):
 
 def score_file_content(filename: str, filepath: str, content: str) -> PresetReport:
     report = PresetReport(filename=filename, filepath=filepath)
-    
+
     lines = content.splitlines()
     for i, line in enumerate(lines):
         analyze_line(line, i + 1, report)
@@ -1863,16 +1863,16 @@ def main():
     target_files = [] # ... file collection logic ...
     if os.path.isfile(args.path):
         target_files = [args.path]
-    
+
     summary = ScanSummary(datetime.datetime.now().isoformat(), os.path.abspath(args.path))
-    
+
     for fpath in target_files:
         report = score_file(fpath)
         if report:
             summary.reports.append(report)
             if not report.is_safe:
                 summary.unsafe_files += 1
-    
+
     summary.total_files = len(summary.reports)
 
     # Output Generation
@@ -1897,8 +1897,8 @@ This test suite covers unit tests for individual regex triggers and integration 
 ```Python
 import pytest
 from pes_safety_scanner import (
-    score_file_content, 
-    REGISTRY, 
+    score_file_content,
+    REGISTRY,
     PresetReport,
     RISK_THRESHOLD
 )
@@ -1914,19 +1914,19 @@ def empty_report():
 @pytest.mark.parametrize("line_content, expected_rule, expected_terms", [
     # 1. Inverter Strobe Checks
     ("ob_r = 1 - ob_r;", "InverterStrobe", ["ob_r"]),
-    ("ib_g = 1 - ib_g;", "InverterStrobe", ["ib_g"]), 
+    ("ib_g = 1 - ib_g;", "InverterStrobe", ["ib_g"]),
     ("ob_r = 0.5 + 0.5*sin(time);", None, None), # Safe usage matches nothing
-    
+
     # 2. High Frequency Checks (> 18.0)
     ("val = sin(time * 20.0);", "HighFreqOsc", ["sin"]),
     ("val = cos(time * 50);", "HighFreqOsc", ["cos"]),
     ("val = sin(time * 2);", None, None), # Safe frequency
-    
+
     # 3. Modulo Checks (< 4)
     ("f = frame % 2;", "FrameModulo", ["frame"]),
     ("t = time % 3;", "FrameModulo", ["time"]),
     ("f = frame % 100;", None, None), # Safe modulo
-    
+
     # 4. Tangent Checks
     ("ob_r = tan(time);", "TanColorRisk", ["ob_r"]),      # Color
     ("rot = tan(time);", "TanMotionRisk", ["rot"]),       # Motion
@@ -1934,11 +1934,11 @@ def empty_report():
 ])
 def test_regex_triggers(line_content, expected_rule, expected_terms):
     """
-    Tests specific lines of code against the analysis engine to ensure 
+    Tests specific lines of code against the analysis engine to ensure
     rules trigger (or don't trigger) as expected.
     """
     report = score_file_content("test", "test", line_content)
-    
+
     if expected_rule:
         assert len(report.events) > 0, f"Expected {expected_rule} but found nothing."
         event = report.events[0]
@@ -1968,16 +1968,16 @@ def test_full_preset_unsafe_cumulative():
     TanColorRisk = 60. Two of them = 120 (UNSAFE).
     """
     content = """
-    ob_r = tan(time); 
+    ob_r = tan(time);
     ob_b = tan(time * 0.5);
     """
     report = score_file_content("unsafe.milk", "/path/unsafe.milk", content)
-    
+
     # Check Logic
     assert len(report.events) == 2
     assert report.events[0].rule_ref == "pes:TanColorRisk"
     assert report.events[0].location == 2  # First line is empty in python string multiline? No, line 2 here.
-    
+
     # Check Math
     assert report.total_score == 120
     assert report.is_safe is False
@@ -1990,15 +1990,15 @@ def test_location_tracking():
     ob_r = 1 - ob_r; // Line 3: Danger
     """
     # Note: splitlines might behave differently with leading newline in multiline string
-    content = content.strip() 
-    
+    content = content.strip()
+
     report = score_file_content("loc.milk", "loc", content)
-    
+
     # ob_r = 1 - ob_r is on the 3rd line of the stripped string
     # "    // Line 1"
     # "    // Line 2"
     # "    ob_r..."
-    
+
     assert len(report.events) == 1
     assert report.events[0].location == 3
     assert report.events[0].term_vectors == ['ob_r']
@@ -2142,7 +2142,7 @@ class MilkLexer:
                         self.line_num += text.count('\n')
                     elif token_type == 'MISMATCH':
                         # Ignore unknown chars (robustness)
-                        pass 
+                        pass
                     else:
                         self.tokens.append(Token(token_type, text, self.line_num))
                     pos = match.end()
@@ -2193,7 +2193,7 @@ class MilkParser:
                 expr = self.parse_expression()
                 self.consume('SEMICOLON') # Optional in some contexts, but we consume if present
                 return Assignment(token.line, target.value, expr)
-        
+
         # If not an assignment, consume until semicolon (skip logic)
         while self.peek() and self.peek().type != 'SEMICOLON':
             self.consume()
@@ -2218,7 +2218,7 @@ class MilkParser:
         if token.type == 'NUMBER':
             self.consume()
             return Literal(token.line, float(token.value))
-        
+
         elif token.type == 'ID':
             name = self.consume().value
             if self.peek() and self.peek().type == 'LPAREN':
@@ -2228,13 +2228,13 @@ class MilkParser:
                 self.consume('RPAREN')
                 return FunctionCall(token.line, name, [arg])
             return Identifier(token.line, name)
-        
+
         elif token.type == 'LPAREN':
             self.consume()
             expr = self.parse_expression()
             self.consume('RPAREN')
             return expr
-            
+
         self.consume() # Skip unknown
         return Literal(token.line, 0)
 
@@ -2314,7 +2314,7 @@ class SafetyVisitor:
 
         # 3. Check Tangent Usage (Context is tricky in visitor, we assume parent assignment checked or global)
         if func == 'tan':
-            # We need to look up the stack to see what we are assigning to, 
+            # We need to look up the stack to see what we are assigning to,
             # but for now we flag the usage.
             self.report.add_event("TanGeneralRisk", 10, "Usage of tan()", node.line, ["tan"])
 
@@ -2325,7 +2325,7 @@ class SafetyVisitor:
                 # Tricky: we need to know if left side is frame/time.
                 if self._contains_var(node.left, ['frame', 'time']):
                     self.report.add_event("FrameModulo", 100, f"Modulo {node.right.value}", node.line, ["%"])
-        
+
         self.visit(node.left)
         self.visit(node.right)
 
@@ -2377,7 +2377,7 @@ def score_file_ast(filepath: str) -> Optional[PresetReport]:
     # 4. Calculate Total
     report.total_score = sum(e.score for e in report.events)
     report.is_safe = report.total_score < 100
-    
+
     return report
 
 if __name__ == "__main__":
@@ -2391,7 +2391,7 @@ if __name__ == "__main__":
         rep = score_file_ast(args.path)
         if rep:
             output = {
-                "@context": JSONLD_CONTEXT["@context"], 
+                "@context": JSONLD_CONTEXT["@context"],
                 "@graph": [asdict(rep)]
             }
             print(json.dumps(output, indent=2))
@@ -2423,16 +2423,16 @@ def analyze_code_string(code_str: str) -> PresetReport:
 @pytest.mark.parametrize("code_snippet, expected_rule, expected_terms", [
     # 1. Inverter Strobe (Standard)
     ("ob_r = 1 - ob_r;", "InverterStrobe", ["ob_r"]),
-    
+
     # 2. Inverter Strobe (Weird Spacing - AST handles this, Regex might fail)
     ("ob_r=  1   -ob_r ;", "InverterStrobe", ["ob_r"]),
-    
+
     # 3. High Frequency (Standard)
     ("val = sin(time * 20);", "HighFreqOsc", ["sin"]),
-    
+
     # 4. High Frequency (Commutative Property)
     ("val = cos(50.5 * time);", "HighFreqOsc", ["cos"]),
-    
+
     # 5. Modulo Strobe
     ("f = frame % 2;", "FrameModulo", ["%"]),
 ])
@@ -2451,12 +2451,12 @@ def test_ast_robustness_multiline():
     and would miss the relationship between 'ob_r' and '1 - ob_r'.
     """
     code = """
-    ob_r = 
-    1 - 
+    ob_r =
+    1 -
     ob_r;
     """
     report = analyze_code_string(code)
-    
+
     assert len(report.events) == 1
     assert "InverterStrobe" in report.events[0].rule_ref
     # The AST node preserves the line number where the assignment started (or operator appeared)
@@ -2483,7 +2483,7 @@ def test_complex_expression_tree():
     """
     code = "ob_r = 0.5 + (0.5 * sin(time * 100));"
     report = analyze_code_string(code)
-    
+
     assert len(report.events) == 1
     assert "HighFreqOsc" in report.events[0].rule_ref
     assert report.events[0].score == 40
@@ -2574,7 +2574,7 @@ class SafetyRegistry:
     """Central configuration for what constitutes a risk."""
     def __init__(self):
         self.rules = {}
-    
+
     def register(self, r_id, name, desc, score, level):
         self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level)
 
@@ -2641,7 +2641,7 @@ class SymbolTable:
     """Tracks the state of variables as we parse the file."""
     def __init__(self):
         self.scopes: Dict[str, TaintState] = {}
-        
+
         # Pre-seed global variables
         self.scopes['time'] = TaintState(is_time_dependent=True, freq_multiplier=1.0)
         self.scopes['frame'] = TaintState(is_time_dependent=True, has_hard_edge=True)
@@ -2654,9 +2654,9 @@ class SymbolTable:
 
 class SafetyAnalyzer:
     """AST Walker that propagates taint and generates events."""
-    
+
     COLOR_VARS = {'ob_r', 'ob_g', 'ob_b', 'ib_r', 'ib_g', 'ib_b', 'wave_r', 'wave_g', 'wave_b'}
-    
+
     def __init__(self):
         self.events: List[RiskEvent] = []
         self.symbols = SymbolTable()
@@ -2684,7 +2684,7 @@ class SafetyAnalyzer:
     def visit_BinaryOp(self, node: BinaryOp) -> TaintState:
         left_state = self.visit(node.left)
         right_state = self.visit(node.right)
-        
+
         # Combine Taints
         new_state = TaintState(
             is_time_dependent=left_state.is_time_dependent or right_state.is_time_dependent,
@@ -2713,7 +2713,7 @@ class SafetyAnalyzer:
         if node.op == '-':
             # We need to check if we are assigning this back to itself, which requires context.
             # But we can mark this expression as a potential "Inverter"
-            pass 
+            pass
 
         return new_state
 
@@ -2725,8 +2725,8 @@ class SafetyAnalyzer:
         if node.name in ['sin', 'cos']:
             if primary_arg.freq_multiplier > 18.0:
                  self.events.append(REGISTRY.create_event(
-                    "HighFreqOsc", 
-                    f"{node.name}() input freq ~{primary_arg.freq_multiplier:.1f} rad/s", 
+                    "HighFreqOsc",
+                    f"{node.name}() input freq ~{primary_arg.freq_multiplier:.1f} rad/s",
                     node.line, [node.name]
                 ))
             # Sin/Cos smooth out hard edges, so we reset hard_edge
@@ -2741,7 +2741,7 @@ class SafetyAnalyzer:
 
     def visit_Assignment(self, node: Assignment) -> TaintState:
         expr_state = self.visit(node.expr)
-        
+
         # 6. Check for Inverter Strobe Logic: "x = 1 - x"
         # We check the AST structure of the expression specifically
         if isinstance(node.expr, BinaryOp) and node.expr.op == '-':
@@ -2761,7 +2761,7 @@ class SafetyAnalyzer:
         # Update Symbol Table (The Taint Logic)
         # We record that 'node.target' now carries the risk of 'expr_state'
         self.symbols.set(node.target, expr_state)
-        
+
         return expr_state
 
 # ==========================================
@@ -2788,12 +2788,12 @@ def print_report(filepath: str, events: List[RiskEvent]):
     """Pretty prints the analysis result."""
     total_score = sum(e.score for e in events)
     is_safe = total_score < 100
-    
+
     status_color = "green" if is_safe else "red"
     status_text = "SAFE" if is_safe else "UNSAFE"
 
     console.print(Panel(f"[bold]Analysis Report: {os.path.basename(filepath)}[/bold]", expand=False))
-    
+
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Line", style="dim", width=6)
     table.add_column("Risk Type", style="cyan")
@@ -2803,9 +2803,9 @@ def print_report(filepath: str, events: List[RiskEvent]):
     for e in events:
         color = "red" if e.risk_level == RiskLevel.BAN else "yellow"
         table.add_row(
-            str(e.line), 
-            f"[{color}]{e.rule_id}[/{color}]", 
-            str(e.score), 
+            str(e.line),
+            f"[{color}]{e.rule_id}[/{color}]",
+            str(e.score),
             e.context
         )
 
@@ -2821,16 +2821,16 @@ def main():
     # lexer = MilkLexer(code)
     # ast = MilkParser(lexer.tokenize()).parse()
     # nodes = ast.statements
-    
+
     # Simulating the AST nodes for the "Taint" demonstration:
     # Scenario: Indirect High Frequency
     # 1. f = time * 20
     # 2. val = sin(f) (Should trigger HighFreq because 'f' is tainted)
-    nodes = dummy_parse("") 
+    nodes = dummy_parse("")
 
     analyzer = SafetyAnalyzer()
     analyzer.analyze(nodes)
-    
+
     print_report(args.file, analyzer.events)
 
 if __name__ == "__main__":
@@ -2939,7 +2939,7 @@ class RuleDefinition:
 class SafetyRegistry:
     def __init__(self):
         self.rules = {}
-    
+
     def register(self, r_id, name, desc, score, level):
         self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level)
 
@@ -3064,7 +3064,7 @@ class MilkParser:
         while self.pos < len(self.tokens):
             stmt = self.parse_statement()
             if stmt: statements.append(stmt)
-            else: self.pos += 1 
+            else: self.pos += 1
         return Program(line=1, statements=statements)
 
     def parse_statement(self):
@@ -3079,7 +3079,7 @@ class MilkParser:
                 if self.peek() and self.peek().type == 'SEMICOLON':
                     self.consume()
                 return Assignment(token.line, target.value, expr)
-        
+
         # Skip until semicolon if not parsed
         while self.peek() and self.peek().type != 'SEMICOLON':
             self.consume()
@@ -3100,7 +3100,7 @@ class MilkParser:
     def parse_factor(self):
         token = self.peek()
         if not token: return Literal(0, 0)
-        
+
         if token.type == 'NUMBER':
             self.consume()
             return Literal(token.line, float(token.value))
@@ -3118,7 +3118,7 @@ class MilkParser:
             expr = self.parse_expression()
             self.consume('RPAREN')
             return expr
-        
+
         self.consume()
         return Literal(token.line, 0)
 
@@ -3174,7 +3174,7 @@ class SafetyAnalyzer:
     def visit_BinaryOp(self, node: BinaryOp) -> TaintState:
         left = self.visit(node.left)
         right = self.visit(node.right)
-        
+
         new_state = TaintState(
             is_time_dependent=left.is_time_dependent or right.is_time_dependent,
             freq_multiplier=max(left.freq_multiplier, right.freq_multiplier),
@@ -3211,13 +3211,13 @@ class SafetyAnalyzer:
 
         if node.name in ['sin', 'cos']:
             # 4. Check Trig Frequency
-            # This is where TAINT PROPAGATION shines. 
-            # We don't check if the argument is "time * 20". 
+            # This is where TAINT PROPAGATION shines.
+            # We don't check if the argument is "time * 20".
             # We check if the argument's *state* has a freq_multiplier > 18.
             if primary.freq_multiplier > 18.0:
                 self.events.append(REGISTRY.create_event(
-                    "HighFreqOsc", 
-                    f"{node.name}() input freq ~{primary.freq_multiplier:.1f}", 
+                    "HighFreqOsc",
+                    f"{node.name}() input freq ~{primary.freq_multiplier:.1f}",
                     node.line, [node.name]))
             return TaintState(is_time_dependent=True, freq_multiplier=primary.freq_multiplier)
 
@@ -3230,7 +3230,7 @@ class SafetyAnalyzer:
 
     def visit_Assignment(self, node: Assignment) -> TaintState:
         expr_state = self.visit(node.expr)
-        
+
         # 6. Check Inverter Strobe (The "1 - self" pattern)
         if expr_state.source_expr == "inverter":
             # We need to dig slightly into AST to confirm "x = 1 - x"
@@ -3268,11 +3268,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("file", help="Path to .milk file")
     args = parser.parse_args()
-    
+
     if os.path.exists(args.file):
         with open(args.file, 'r') as f:
             events = scan_code(f.read(), args.file)
-        
+
         # Simple report
         console.print(Panel(f"Analysis: {args.file}"))
         t = Table("Line", "Rule", "Risk")
@@ -3295,7 +3295,7 @@ def test_direct_high_frequency():
     """
     code = "val = sin(time * 20);"
     events = scan_code(code)
-    
+
     assert len(events) == 1
     assert events[0].rule_id == "HighFreqOsc"
     assert "input freq ~20.0" in events[0].context
@@ -3310,7 +3310,7 @@ def test_indirect_high_frequency():
     val = sin(f);    // sin(f) checks f's taint and triggers warning
     """
     events = scan_code(code)
-    
+
     assert len(events) == 1
     assert events[0].rule_id == "HighFreqOsc"
     assert "input freq ~20.0" in events[0].context
@@ -3320,11 +3320,11 @@ def test_commutative_multiplication():
     TAINT TEST: Ensures freq=20 is detected regardless of operand order.
     """
     code = """
-    f = 25 * time; 
+    f = 25 * time;
     val = cos(f);
     """
     events = scan_code(code)
-    
+
     assert len(events) == 1
     assert events[0].rule_id == "HighFreqOsc"
     assert "input freq ~25.0" in events[0].context
@@ -3338,7 +3338,7 @@ def test_indirect_tangent_color():
     ob_r = temp;        // Assigning temp to color triggers TanColor risk
     """
     events = scan_code(code)
-    
+
     assert len(events) == 1
     assert events[0].rule_id == "TanColor"
 
@@ -3349,12 +3349,12 @@ def test_variable_reassignment():
     code = """
     f = time * 2;   // Safe frequency
     val = sin(f);   // Safe
-    
+
     f = time * 50;  // Reassign f to dangerous frequency
     val = sin(f);   // Dangerous
     """
     events = scan_code(code)
-    
+
     assert len(events) == 1
     assert events[0].rule_id == "HighFreqOsc"
     # The event should be on line 6 (the second sin call)
@@ -3366,7 +3366,7 @@ def test_indirect_inverter_strobe():
     Regex looking for 'ob_r = 1 - ob_r' often fails if spaces or steps differ.
     """
     code = """
-    ob_r = 1 - ob_r; 
+    ob_r = 1 - ob_r;
     """
     events = scan_code(code)
     assert len(events) == 1
@@ -3476,7 +3476,7 @@ class RuleDefinition:
 class SafetyRegistry:
     def __init__(self):
         self.rules: Dict[str, RuleDefinition] = {}
-    
+
     def register(self, r_id, name, desc, score, level):
         self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level)
 
@@ -3485,7 +3485,7 @@ class SafetyRegistry:
             return RiskEvent(rule_id, RiskLevel.INFO, 0, context, line, vars)
         rule = self.rules[rule_id]
         return RiskEvent(rule_id, rule.level, rule.base_score, context, line, vars)
-    
+
     def export_ontology(self):
         return [r.to_jsonld() for r in self.rules.values()]
 
@@ -3604,7 +3604,7 @@ class MilkParser:
         while self.pos < len(self.tokens):
             stmt = self.parse_statement()
             if stmt: statements.append(stmt)
-            else: self.pos += 1 
+            else: self.pos += 1
         return Program(line=1, statements=statements)
 
     def parse_statement(self):
@@ -3618,7 +3618,7 @@ class MilkParser:
                 if self.peek() and self.peek().type == 'SEMICOLON':
                     self.consume()
                 return Assignment(token.line, target.value, expr)
-        
+
         while self.peek() and self.peek().type != 'SEMICOLON':
             self.consume()
         self.consume('SEMICOLON')
@@ -3638,7 +3638,7 @@ class MilkParser:
     def parse_factor(self):
         token = self.peek()
         if not token: return Literal(0, 0)
-        
+
         if token.type == 'NUMBER':
             self.consume()
             return Literal(token.line, float(token.value))
@@ -3655,7 +3655,7 @@ class MilkParser:
             expr = self.parse_expression()
             self.consume('RPAREN')
             return expr
-        
+
         self.consume()
         return Literal(token.line, 0)
 
@@ -3668,7 +3668,7 @@ class TaintState:
     is_time_dependent: bool = False
     freq_multiplier: float = 0.0
     has_hard_edge: bool = False
-    source_expr: str = "" 
+    source_expr: str = ""
 
 class SymbolTable:
     def __init__(self):
@@ -3710,7 +3710,7 @@ class SafetyAnalyzer:
     def visit_BinaryOp(self, node: BinaryOp) -> TaintState:
         left = self.visit(node.left)
         right = self.visit(node.right)
-        
+
         new_state = TaintState(
             is_time_dependent=left.is_time_dependent or right.is_time_dependent,
             freq_multiplier=max(left.freq_multiplier, right.freq_multiplier),
@@ -3745,8 +3745,8 @@ class SafetyAnalyzer:
         if node.name in ['sin', 'cos']:
             if primary.freq_multiplier > 18.0:
                 self.events.append(REGISTRY.create_event(
-                    "HighFreqOsc", 
-                    f"{node.name}() input freq ~{primary.freq_multiplier:.1f}", 
+                    "HighFreqOsc",
+                    f"{node.name}() input freq ~{primary.freq_multiplier:.1f}",
                     node.line, [node.name]))
             return TaintState(is_time_dependent=True, freq_multiplier=primary.freq_multiplier)
 
@@ -3757,7 +3757,7 @@ class SafetyAnalyzer:
 
     def visit_Assignment(self, node: Assignment) -> TaintState:
         expr_state = self.visit(node.expr)
-        
+
         # Inverter Strobe (1 - self)
         if expr_state.source_expr == "inverter":
             if isinstance(node.expr, BinaryOp) and isinstance(node.expr.right, Identifier):
@@ -3827,13 +3827,13 @@ def main():
     parser.add_argument("-r", "--recursive", action="store_true", help="Recursively scan directories.")
     parser.add_argument("-o", "--output", default="report.jsonld", help="Output file for JSON-LD report.")
     parser.add_argument("--help-scoring", action="store_true", help="Show detailed documentation on scoring rules.")
-    
+
     args = parser.parse_args()
 
     # --- 1. HANDLE DOCS ---
     if args.help_scoring:
         console.print(Panel("[bold cyan]Scoring Rules Ontology[/bold cyan]", box=box.HEAVY))
-        
+
         table = Table("Rule ID", "Level", "Score", "Description")
         for r in REGISTRY.rules.values():
             color = "red" if r.level == RiskLevel.BAN else "yellow"
@@ -3882,7 +3882,7 @@ def main():
             "reports": {"@id": "pes:hasReport", "@container": "@list"}
         }
     }
-    
+
     output_data = {
         "@context": jsonld_context["@context"],
         "@graph": [
@@ -4001,7 +4001,7 @@ class RuleDefinition:
 class SafetyRegistry:
     def __init__(self):
         self.rules: Dict[str, RuleDefinition] = {}
-    
+
     def register(self, r_id, name, desc, score, level):
         self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level)
 
@@ -4010,7 +4010,7 @@ class SafetyRegistry:
             return RiskEvent(rule_id, RiskLevel.INFO, 0, context, line, vars)
         rule = self.rules[rule_id]
         return RiskEvent(rule_id, rule.level, rule.base_score, context, line, vars)
-    
+
     def export_ontology(self):
         return [r.to_jsonld() for r in self.rules.values()]
 
@@ -4099,7 +4099,7 @@ class MilkParser:
         while self.pos < len(self.tokens):
             stmt = self.parse_statement()
             if stmt: statements.append(stmt)
-            else: self.pos += 1 
+            else: self.pos += 1
         return Program(line=1, statements=statements)
     def parse_statement(self):
         token = self.peek()
@@ -4140,7 +4140,7 @@ class TaintState:
     is_time_dependent: bool = False
     freq_multiplier: float = 0.0
     has_hard_edge: bool = False
-    source_expr: str = "" 
+    source_expr: str = ""
 
 class SymbolTable:
     def __init__(self):
@@ -4214,7 +4214,7 @@ class SafetyAnalyzer:
 
 def build_earl_assertion(filepath: str, event: RiskEvent) -> Dict:
     """Creates a single EARL Assertion from a RiskEvent"""
-    
+
     # earl:Assertion
     return {
         "@type": "earl:Assertion",
@@ -4265,7 +4265,7 @@ def main():
     # --- 2. COLLECT FILES ---
     if not args.path:
         parser.print_help(); sys.exit(1)
-    
+
     target_files = []
     if os.path.isfile(args.path): target_files.append(args.path)
     elif os.path.isdir(args.path):
@@ -4277,10 +4277,10 @@ def main():
 
     # --- 3. EXECUTE & BUILD GRAPH ---
     console.print(f"[bold]Scanning {len(target_files)} files...[/bold]")
-    
+
     # Start with the Ontology and Tool Definition
     earl_graph = []
-    
+
     # Define Tool
     earl_graph.append({
         "@id": TOOL_ID,
@@ -4294,11 +4294,11 @@ def main():
     earl_graph.extend(REGISTRY.export_ontology())
 
     unsafe_count = 0
-    
+
     for fpath in target_files:
         events = scan_file(fpath)
         abs_path = "file://" + os.path.abspath(fpath)
-        
+
         if events:
             unsafe_count += 1
             console.print(f"[red]FAIL[/red]: {os.path.basename(fpath)}")
@@ -4392,7 +4392,7 @@ class RiskLevel(str, enum.Enum):
 class RiskEvent:
     """
     Internal representation of a detected issue.
-    
+
     Attributes:
         rule_id: The unique identifier of the rule that was triggered.
         risk_level: The severity of the risk.
@@ -4412,7 +4412,7 @@ class RiskEvent:
 class RuleDefinition:
     """
     Defines a safety rule, mapping to an earl:TestCriterion.
-    
+
     Attributes:
         id: Unique rule ID (e.g., 'InverterStrobe').
         name: Human-readable name.
@@ -4444,7 +4444,7 @@ class SafetyRegistry:
     """
     def __init__(self):
         self.rules: Dict[str, RuleDefinition] = {}
-    
+
     def register(self, r_id: str, name: str, desc: str, score: int, level: RiskLevel):
         """Registers a new rule definition."""
         self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level)
@@ -4455,7 +4455,7 @@ class SafetyRegistry:
             return RiskEvent(rule_id, RiskLevel.INFO, 0, context, line, vars)
         rule = self.rules[rule_id]
         return RiskEvent(rule_id, rule.level, rule.base_score, context, line, vars)
-    
+
     def export_ontology(self) -> List[Dict]:
         """Exports all registered rules as a list of JSON-LD objects."""
         return [r.to_jsonld() for r in self.rules.values()]
@@ -4585,7 +4585,7 @@ class MilkParser:
         while self.pos < len(self.tokens):
             stmt = self.parse_statement()
             if stmt: statements.append(stmt)
-            else: self.pos += 1 
+            else: self.pos += 1
         return Program(line=1, statements=statements)
 
     def parse_statement(self) -> Optional[Node]:
@@ -4643,7 +4643,7 @@ class MilkParser:
 class TaintState:
     """
     Represents the analysis state of a variable or expression.
-    
+
     Attributes:
         is_time_dependent: True if the value changes over time (not constant).
         freq_multiplier: The estimated frequency in rad/s if applicable.
@@ -4653,7 +4653,7 @@ class TaintState:
     is_time_dependent: bool = False
     freq_multiplier: float = 0.0
     has_hard_edge: bool = False
-    source_expr: str = "" 
+    source_expr: str = ""
 
 class SymbolTable:
     """Stores the TaintState for variables within the current scope."""
@@ -4704,7 +4704,7 @@ class SafetyAnalyzer:
     def visit_BinaryOp(self, node: BinaryOp) -> TaintState:
         left = self.visit(node.left)
         right = self.visit(node.right)
-        
+
         new_state = TaintState(
             is_time_dependent=left.is_time_dependent or right.is_time_dependent,
             freq_multiplier=max(left.freq_multiplier, right.freq_multiplier),
@@ -4716,14 +4716,14 @@ class SafetyAnalyzer:
             if (left.is_time_dependent and isinstance(node.right, Literal) and node.right.value < 4):
                  self.events.append(REGISTRY.create_event("FrameModulo", f"Modulo {node.right.value}", node.line, []))
             new_state.has_hard_edge = True
-        
+
         # 2. Frequency Propagation (time * 50)
         if node.op == '*':
             if left.is_time_dependent and isinstance(node.right, Literal):
                 new_state.freq_multiplier = left.freq_multiplier * node.right.value
             elif right.is_time_dependent and isinstance(node.left, Literal):
                 new_state.freq_multiplier = right.freq_multiplier * node.left.value
-        
+
         # 3. Inverter Identification (1 - x)
         if node.op == '-':
             if isinstance(node.left, Literal) and node.left.value == 1:
@@ -4740,29 +4740,29 @@ class SafetyAnalyzer:
             if primary.freq_multiplier > 18.0:
                 self.events.append(REGISTRY.create_event("HighFreqOsc", f"Freq ~{primary.freq_multiplier:.1f}", node.line, [node.name]))
             return TaintState(is_time_dependent=True, freq_multiplier=primary.freq_multiplier)
-        
+
         if node.name == 'tan':
             # 5. Tangent Risk Identification
             return TaintState(is_time_dependent=True, has_hard_edge=True, source_expr="tan")
-        
+
         return primary
 
     def visit_Assignment(self, node: Assignment) -> TaintState:
         expr_state = self.visit(node.expr)
-        
+
         # 6. Inverter Strobe Check (x = 1 - x)
         if expr_state.source_expr == "inverter":
             if isinstance(node.expr, BinaryOp) and isinstance(node.expr.right, Identifier):
                 if node.expr.right.name == node.target and node.target in self.COLOR_VARS:
                     self.events.append(REGISTRY.create_event("InverterStrobe", f"Strobe {node.target}", node.line, [node.target]))
-        
+
         # 7. Tangent Drive Check
         if expr_state.source_expr == "tan":
             if node.target in self.COLOR_VARS:
                 self.events.append(REGISTRY.create_event("TanColor", f"Tan->{node.target}", node.line, [node.target]))
             elif node.target in self.MOTION_VARS:
                 self.events.append(REGISTRY.create_event("TanMotion", f"Tan->{node.target}", node.line, [node.target]))
-        
+
         # Propagate Taint to Variable
         self.symbols.set(node.target, expr_state)
         return expr_state
@@ -4774,11 +4774,11 @@ class SafetyAnalyzer:
 def build_earl_assertion(filepath: str, event: RiskEvent) -> Dict:
     """
     Creates a single EARL Assertion object for a given RiskEvent.
-    
+
     Args:
         filepath: The URI/Path of the file being tested.
         event: The risk event detected.
-        
+
     Returns:
         A dictionary representing an earl:Assertion JSON-LD object.
     """
@@ -4829,7 +4829,7 @@ def main():
 
     if not args.path:
         parser.print_help(); sys.exit(1)
-    
+
     target_files = []
     if os.path.isfile(args.path): target_files.append(args.path)
     elif os.path.isdir(args.path):
@@ -4840,9 +4840,9 @@ def main():
             target_files = [os.path.join(args.path, f) for f in os.listdir(args.path) if f.endswith(".milk")]
 
     console.print(f"[bold]Scanning {len(target_files)} files...[/bold]")
-    
+
     earl_graph = []
-    
+
     # 1. Add Tool Definition
     earl_graph.append({
         "@id": TOOL_ID,
@@ -4856,16 +4856,16 @@ def main():
     earl_graph.extend(REGISTRY.export_ontology())
 
     unsafe_count = 0
-    
+
     for fpath in target_files:
         try:
             with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
                 events = scan_code(f.read())
         except Exception:
             events = []
-            
+
         abs_path = "file://" + os.path.abspath(fpath)
-        
+
         if events:
             unsafe_count += 1
             console.print(f"[red]FAIL[/red]: {os.path.basename(fpath)}")
@@ -4904,10 +4904,10 @@ import pytest
 import json
 import os
 from pes_earl_scanner import (
-    scan_code, 
-    build_earl_assertion, 
-    REGISTRY, 
-    RiskEvent, 
+    scan_code,
+    build_earl_assertion,
+    REGISTRY,
+    RiskEvent,
     RiskLevel,
     MilkLexer,
     MilkParser,
@@ -4925,7 +4925,7 @@ def test_lexer_tokenization():
     code = "ob_r = sin(time);"
     lexer = MilkLexer(code)
     tokens = lexer.tokenize()
-    
+
     assert len(tokens) == 6  # ID, ASSIGN, ID, LPAREN, ID, RPAREN, SEMICOLON
     assert tokens[0].type == 'ID' and tokens[0].value == 'ob_r'
     assert tokens[1].type == 'ASSIGN'
@@ -4948,10 +4948,10 @@ def test_parser_structure():
     lexer = MilkLexer(code)
     parser = MilkParser(lexer.tokenize())
     program = parser.parse()
-    
+
     assert len(program.statements) == 1
     stmt = program.statements[0]
-    
+
     assert isinstance(stmt, Assignment)
     assert stmt.target == 'ob_r'
     # 1 - ob_r is a BinaryOp
@@ -5011,9 +5011,9 @@ def test_earl_assertion_structure():
         line=10,
         variables=["ob_r"]
     )
-    
+
     assertion = build_earl_assertion("file:///test.milk", event)
-    
+
     assert assertion["@type"] == "earl:Assertion"
     assert assertion["earl:test"] == "pes:InverterStrobe"
     assert assertion["earl:result"]["earl:outcome"] == "earl:failed"
@@ -5022,7 +5022,7 @@ def test_earl_assertion_structure():
 
 def test_full_report_generation(tmp_path):
     """
-    Simulates a full run of the script against a temporary file 
+    Simulates a full run of the script against a temporary file
     and checks the final JSON-LD output.
     """
     # 1. Create a dummy dangerous file
@@ -5030,28 +5030,28 @@ def test_full_report_generation(tmp_path):
     d.mkdir()
     p = d / "dangerous.milk"
     p.write_text("ob_r = 1 - ob_r;") # Trigger InverterStrobe
-    
-    # 2. We can't easily invoke main() due to arg parsing, 
+
+    # 2. We can't easily invoke main() due to arg parsing,
     # but we can simulate the logic main() uses.
-    
+
     # Generate Events
     with open(p, 'r') as f:
         events = scan_code(f.read())
-    
+
     # Build Graph
     earl_graph = REGISTRY.export_ontology()
     for e in events:
         earl_graph.append(build_earl_assertion(f"file://{p}", e))
-        
+
     output = {
         "@context": {}, # Context would go here
         "@graph": earl_graph
     }
-    
+
     # 3. Validation
     # Identify the assertion in the graph
     assertions = [x for x in output["@graph"] if x.get("@type") == "earl:Assertion"]
-    
+
     assert len(assertions) == 1
     assert assertions[0]["earl:test"] == "pes:InverterStrobe"
     assert "dangerous.milk" in assertions[0]["earl:subject"]["@id"]
@@ -5165,28 +5165,28 @@ If you are building a safety pipeline for a repository like typical projectM dis
 def check_dynamic_safety(renderer, preset_file):
     # 1. Load Preset
     renderer.load(preset_file)
-    
+
     flashes = 0
     last_luma = 0.0
-    
+
     # 2. Render 60 frames (1 second)
     for i in range(60):
         # Simulate a heavy beat every 15 frames (4Hz)
         audio_input = 1.0 if i % 15 == 0 else 0.0
         renderer.update_audio(audio_input)
-        
+
         # Get pixels
-        frame = renderer.get_framebuffer() 
-        
+        frame = renderer.get_framebuffer()
+
         # Calculate Perception of Brightness (Rec. 601)
         cur_luma = calculate_luminance(frame)
-        
+
         # Check delta > 10%
         if abs(cur_luma - last_luma) > 0.1:
             flashes += 1
-            
+
         last_luma = cur_luma
-        
+
     # 3. Fail if > 3 flashes per second (Harding/WCAG standard)
     return flashes <= 3
 ```
@@ -5327,7 +5327,7 @@ class Token: type: str; value: str; line: int
 class MilkLexer:
     def __init__(self, code):
         self.code = code; self.line_num = 1; self.tokens = []
-    
+
     def tokenize(self):
         pos = 0
         while pos < len(self.code):
@@ -5364,7 +5364,7 @@ class MilkParser:
         while self.pos < len(self.tokens):
             stmt = self.parse_statement()
             if stmt: stmts.append(stmt)
-            else: self.pos += 1 
+            else: self.pos += 1
         return Program(line=1, statements=stmts)
 
     def parse_block(self):
@@ -5404,14 +5404,14 @@ class MilkParser:
                 expr = self.parse_expression()
                 self.consume('SEMICOLON')
                 return Assignment(tok.line, target.value, expr)
-        
+
         # Skip unknown
         while self.peek() and self.peek().type != 'SEMICOLON': self.consume()
         self.consume('SEMICOLON')
         return None
 
     def parse_expression(self): return self.parse_term()
-    
+
     def parse_term(self):
         left = self.parse_factor()
         while self.peek() and self.peek().type == 'OP':
@@ -5422,29 +5422,29 @@ class MilkParser:
     def parse_factor(self):
         tok = self.peek()
         if not tok: return Literal(0, 0)
-        
+
         if tok.type == 'NUMBER': self.consume(); return Literal(tok.line, float(tok.value))
         elif tok.type == 'ID' or tok.type == 'TYPE': # Constructors look like types
             name = self.consume().value
             if self.peek() and self.peek().type == 'LPAREN': # Func call or Constructor
                 self.consume('LPAREN')
                 # Simple arg parsing (only 1 arg for simplicity in this demo)
-                arg = self.parse_expression() 
+                arg = self.parse_expression()
                 self.consume('RPAREN')
                 node = FunctionCall(tok.line, name, [arg])
             else:
                 node = Identifier(tok.line, name)
-            
+
             # Swizzling check (col.rgb)
             if self.peek() and self.peek().type == 'DOT':
                 self.consume('DOT')
                 mem = self.consume('ID')
                 if mem: node = MemberAccess(tok.line, node, mem.value)
             return node
-            
+
         elif tok.type == 'LPAREN':
             self.consume(); expr = self.parse_expression(); self.consume(); return expr
-        
+
         self.consume(); return Literal(0, 0)
 
 # ==========================================
@@ -5456,11 +5456,11 @@ class TaintState:
     is_time_dep: bool = False
     freq: float = 0.0
     hard_edge: bool = False
-    source: str = "" 
+    source: str = ""
 
 class SafetyAnalyzer:
     COLOR_VARS = {'ob_r', 'ob_g', 'ob_b', 'wave_r', 'wave_g', 'wave_b', 'gl_FragColor', 'ret'}
-    
+
     def __init__(self, context="CPU"):
         self.events = []
         self.context = context # CPU or GPU
@@ -5477,23 +5477,23 @@ class SafetyAnalyzer:
         return method(node)
 
     def generic_visit(self, node):
-        if isinstance(node, Program): 
+        if isinstance(node, Program):
             for s in node.statements: self.analyze(s)
         elif isinstance(node, Block):
             for s in node.statements: self.analyze(s)
         return TaintState()
 
     def visit_Literal(self, node): return TaintState()
-    
+
     def visit_Identifier(self, node): return self.get_taint(node.name)
 
-    def visit_MemberAccess(self, node): 
+    def visit_MemberAccess(self, node):
         # Taint of 'col.rgb' is same as 'col'
         return self.analyze(node.expr)
 
     def visit_BinaryOp(self, node):
         left = self.analyze(node.left); right = self.analyze(node.right)
-        
+
         state = TaintState(
             is_time_dep=left.is_time_dep or right.is_time_dep,
             freq=max(left.freq, right.freq),
@@ -5523,7 +5523,7 @@ class SafetyAnalyzer:
             if primary.freq > 18.0:
                 self.events.append(REGISTRY.create_event("HighFreqOsc", f"{node.name} freq ~{primary.freq:.1f}", node.line, [], self.context))
             return TaintState(is_time_dep=True, freq=primary.freq)
-        
+
         if node.name == 'tan':
             return TaintState(is_time_dep=True, hard_edge=True, source="tan")
 
@@ -5537,7 +5537,7 @@ class SafetyAnalyzer:
 
     def visit_Assignment(self, node):
         expr_state = self.analyze(node.expr)
-        
+
         # Inverter Check (x = 1 - x)
         if expr_state.source == "inverter":
             # Simple check if assigning back to self
@@ -5560,7 +5560,7 @@ class SafetyAnalyzer:
 def extract_shaders(milk_code: str) -> Dict[str, str]:
     """Extracts GPU shader code strings from the CPU code."""
     shaders = {}
-    
+
     # regex to find warp_shader=" ... ";
     # Handles multiline strings often found in .milk
     for shader_type in ['warp', 'comp']:
@@ -5570,12 +5570,12 @@ def extract_shaders(milk_code: str) -> Dict[str, str]:
             # Unescape newlines/quotes
             raw = match.group(1).replace('\\"', '"').replace('\\n', '\n')
             shaders[shader_type] = raw
-            
+
     return shaders
 
 def scan_file_full(filepath: str) -> List[RiskEvent]:
     all_events = []
-    
+
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             full_code = f.read()
@@ -5592,14 +5592,14 @@ def scan_file_full(filepath: str) -> List[RiskEvent]:
     shaders = extract_shaders(full_code)
     for s_type, s_code in shaders.items():
         if not s_code.strip(): continue
-        
+
         lexer = MilkLexer(s_code)
         ast = MilkParser(lexer.tokenize()).parse()
         gpu_ana = SafetyAnalyzer(f"GPU:{s_type}")
-        
+
         # Seed GPU taint from CPU? (Advanced: assume uniforms like 'time' are tainted)
         gpu_ana.symbols['time'] = TaintState(is_time_dep=True, freq=1.0)
-        
+
         gpu_ana.analyze(ast)
         all_events.extend(gpu_ana.events)
 
@@ -5612,7 +5612,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     events = scan_file_full(args.file)
-    
+
     console.print(Panel(f"Scan Results: {args.file}"))
     t = Table("Type", "Rule", "Context", "Score")
     for e in events:
@@ -5787,7 +5787,7 @@ class Token: type: str; value: str; line: int
 class MilkLexer:
     def __init__(self, code):
         self.code = code; self.line_num = 1; self.tokens = []
-    
+
     def tokenize(self):
         pos = 0
         while pos < len(self.code):
@@ -5824,7 +5824,7 @@ class MilkParser:
         while self.pos < len(self.tokens):
             stmt = self.parse_statement()
             if stmt: stmts.append(stmt)
-            else: self.pos += 1 
+            else: self.pos += 1
         return Program(line=1, statements=stmts)
 
     def parse_block(self):
@@ -5840,7 +5840,7 @@ class MilkParser:
     def parse_statement(self):
         tok = self.peek()
         if not tok: return None
-        
+
         if tok.type == 'LBRACE': return self.parse_block()
 
         # Declaration: float x = ...
@@ -5864,14 +5864,14 @@ class MilkParser:
                 expr = self.parse_expression()
                 self.consume('SEMICOLON')
                 return Assignment(tok.line, target.value, expr)
-        
+
         # Skip unknown
         while self.peek() and self.peek().type != 'SEMICOLON': self.consume()
         self.consume('SEMICOLON')
         return None
 
     def parse_expression(self): return self.parse_term()
-    
+
     def parse_term(self):
         left = self.parse_factor()
         while self.peek() and self.peek().type == 'OP':
@@ -5882,11 +5882,11 @@ class MilkParser:
     def parse_factor(self):
         tok = self.peek()
         if not tok: return Literal(0, 0)
-        
+
         if tok.type == 'NUMBER': self.consume(); return Literal(tok.line, float(tok.value))
         elif tok.type == 'ID' or tok.type == 'TYPE':
             name = self.consume().value
-            
+
             # Function Call or Constructor: name(...)
             if self.peek() and self.peek().type == 'LPAREN':
                 self.consume('LPAREN')
@@ -5895,17 +5895,17 @@ class MilkParser:
                 node = FunctionCall(tok.line, name, args)
             else:
                 node = Identifier(tok.line, name)
-            
+
             # Swizzling: .rgb
             while self.peek() and self.peek().type == 'DOT':
                 self.consume('DOT')
                 mem = self.consume('ID')
                 if mem: node = MemberAccess(tok.line, node, mem.value)
             return node
-            
+
         elif tok.type == 'LPAREN':
             self.consume(); expr = self.parse_expression(); self.consume(); return expr
-        
+
         self.consume(); return Literal(0, 0)
 
     def parse_arg_list(self) -> List[Node]:
@@ -5927,11 +5927,11 @@ class TaintState:
     is_time_dep: bool = False
     freq: float = 0.0
     hard_edge: bool = False
-    source: str = "" 
+    source: str = ""
 
 class SafetyAnalyzer:
     COLOR_VARS = {'ob_r', 'ob_g', 'ob_b', 'wave_r', 'wave_g', 'wave_b', 'gl_FragColor', 'ret'}
-    
+
     def __init__(self, context="CPU"):
         self.events = []
         self.context = context
@@ -5975,7 +5975,7 @@ class SafetyAnalyzer:
     def visit_FunctionCall(self, node):
         args = [self.analyze(a) for a in node.args]
         primary = args[0] if args else TaintState()
-        
+
         # Merge time dependence from all args (e.g., mix(a, b, time))
         any_time_dep = any(a.is_time_dep for a in args)
 
@@ -5983,7 +5983,7 @@ class SafetyAnalyzer:
             if primary.freq > 18.0:
                 self.events.append(REGISTRY.create_event("HighFreqOsc", f"{node.name} freq ~{primary.freq:.1f}", node.line, [], self.context))
             return TaintState(is_time_dep=True, freq=primary.freq)
-        
+
         if node.name == 'tan':
             return TaintState(is_time_dep=True, hard_edge=True, source="tan")
 
@@ -6001,7 +6001,7 @@ class SafetyAnalyzer:
             if isinstance(node.expr, BinaryOp) and isinstance(node.expr.right, Identifier):
                  if node.expr.right.name == node.target:
                     self.events.append(REGISTRY.create_event("InverterStrobe", f"Inverter on {node.target}", node.line, [node.target], self.context))
-        
+
         if node.target in self.COLOR_VARS and expr_state.source == "tan":
             self.events.append(REGISTRY.create_event("TanColor", f"Tan -> {node.target}", node.line, [node.target], self.context))
 
@@ -6067,7 +6067,7 @@ def test_lexer_types_and_blocks():
     code = "float x; { vec3 y; }"
     lexer = MilkLexer(code)
     tokens = lexer.tokenize()
-    
+
     types = [t.type for t in tokens]
     # Expected: TYPE ID SEMICOLON LBRACE TYPE ID SEMICOLON RBRACE
     assert types == ['TYPE', 'ID', 'SEMICOLON', 'LBRACE', 'TYPE', 'ID', 'SEMICOLON', 'RBRACE']
@@ -6088,7 +6088,7 @@ def test_parser_variable_declaration():
     code = "float x = 1.0;"
     parser = MilkParser(MilkLexer(code).tokenize())
     program = parser.parse()
-    
+
     stmt = program.statements[0]
     assert isinstance(stmt, Assignment)
     assert stmt.is_decl is True
@@ -6098,7 +6098,7 @@ def test_parser_block():
     code = "{ x = 1.0; }"
     parser = MilkParser(MilkLexer(code).tokenize())
     program = parser.parse()
-    
+
     block = program.statements[0]
     assert isinstance(block, Block)
     assert len(block.statements) == 1
@@ -6108,7 +6108,7 @@ def test_parser_multi_arg_function():
     code = "val = mix(a, b, 0.5);"
     parser = MilkParser(MilkLexer(code).tokenize())
     program = parser.parse()
-    
+
     stmt = program.statements[0]
     assert isinstance(stmt.expr, FunctionCall)
     assert len(stmt.expr.args) == 3
@@ -6117,7 +6117,7 @@ def test_parser_constructor_and_swizzle():
     code = "ret = vec3(1,0,0).rgb;"
     parser = MilkParser(MilkLexer(code).tokenize())
     program = parser.parse()
-    
+
     stmt = program.statements[0]
     # Structure: Assignment(target='ret', expr=MemberAccess(expr=FunctionCall(vec3), member='rgb'))
     assert stmt.expr.member == "rgb"
@@ -6133,7 +6133,7 @@ def test_taint_step_function():
     ast = parser.parse()
     analyzer = SafetyAnalyzer("GPU")
     analyzer.analyze(ast)
-    
+
     assert len(analyzer.events) == 1
     assert analyzer.events[0].rule_id == "StepFunction"
 
@@ -6144,7 +6144,7 @@ def test_taint_mix_propagation():
     ast = parser.parse()
     analyzer = SafetyAnalyzer("GPU")
     analyzer.analyze(ast)
-    
+
     # mix(..., time) makes 'val' time-dependent.
     # step(..., val) checks if 'val' is time-dependent.
     assert len(analyzer.events) == 1
@@ -6156,7 +6156,7 @@ def test_taint_high_freq_gpu():
     ast = parser.parse()
     analyzer = SafetyAnalyzer("GPU")
     analyzer.analyze(ast)
-    
+
     assert len(analyzer.events) == 1
     assert analyzer.events[0].rule_id == "HighFreqOsc"
 
@@ -6180,14 +6180,14 @@ def test_integration_full_scan(tmp_path):
     p = tmp_path / "test.milk"
     p.write_text("""
     ob_r = 0.5; // Safe CPU
-    warp_shader="shader_body { 
+    warp_shader="shader_body {
         float x = step(0.5, time); // Dangerous GPU
     }";
     """)
-    
+
     from pes_shader_scanner import scan_file_full
     events = scan_file_full(str(p))
-    
+
     assert len(events) == 1
     assert events[0].rule_id == "StepFunction"
     assert events[0].source_type == "GPU:warp"
@@ -6240,18 +6240,18 @@ from collections import deque
 
 def static_scan_simulation(filepath: str):
     """
-    Simulates the AST scanner. In production, import `scan_file_full` 
+    Simulates the AST scanner. In production, import `scan_file_full`
     from `pes_shader_scanner`.
     """
     filename = os.path.basename(filepath)
     events = []
-    
+
     # Simulate finding specific static triggers based on filename keywords
     if "static_ban" in filename:
         events.append(RiskEvent("InverterStrobe", RiskLevel.BAN, 150, "val = 1 - val", 1, ["ob_r"]))
     elif "static_warn" in filename:
         events.append(RiskEvent("HighFreqOsc", RiskLevel.WARNING, 40, "sin(time*20)", 1, ["rot"]))
-        
+
     return events
 
 # ==========================================
@@ -6319,16 +6319,16 @@ class MockProjectM(IRenderer):
 
     def render_frame(self) -> float:
         self.frame_count += 1
-        
+
         if self.mode == "safe":
             # Smooth sine wave (0.1 Hz) - Safe
             return 0.5 + 0.4 * math.sin(self.frame_count * 0.01)
-            
+
         elif self.mode == "strobe":
             # Hard 15 Hz Strobe (Dangerous)
             # Toggle every 2 frames at 30fps, or 4 at 60fps
             return 1.0 if (self.frame_count // 4) % 2 == 0 else 0.0
-            
+
         elif self.mode == "edge":
             # 2.5 Hz Flash (Safe by standard, but annoying)
             # 60 FPS / 2.5 = 24 frames per cycle
@@ -6346,10 +6346,10 @@ class FlashDetector:
         self.fps = fps
         self.threshold = threshold # 10% luminance change
         self.limit = limit         # Max 3 flashes per second
-        
+
         self.last_lum = 0.0
         # Queue stores frame indices where a flash occurred
-        self.flash_history: Deque[int] = deque() 
+        self.flash_history: Deque[int] = deque()
         self.total_flashes = 0
         self.max_flashes_in_sec = 0
 
@@ -6357,7 +6357,7 @@ class FlashDetector:
         # 1. Calculate Delta
         delta = abs(luminance - self.last_lum)
         self.last_lum = luminance
-        
+
         # 2. Detect Flash Transition
         # We count a flash on the transition.
         if delta > self.threshold:
@@ -6393,25 +6393,25 @@ def scan_dynamic(filepath: str, duration_sec: int, fps: int) -> List[RiskEvent]:
     renderer = MockProjectM() # Swap for real libprojectm wrapper in prod
     detector = FlashDetector(fps=fps)
     renderer.load_preset(filepath)
-    
+
     events = []
     failed = False
-    
+
     total_frames = duration_sec * fps
-    
+
     # 2. Render Loop
     for i in range(total_frames):
         renderer.update_audio()
         lum = renderer.render_frame()
-        
+
         risk = detector.process_frame(i, lum)
-        
+
         if risk and not failed:
             events.append(risk)
             failed = True # Stop adding events after first failure, but finish stats?
             # Optimization: break early if we want speed over full stats
             break
-            
+
     return events
 
 # ==========================================
@@ -6420,11 +6420,11 @@ def scan_dynamic(filepath: str, duration_sec: int, fps: int) -> List[RiskEvent]:
 
 def run_hybrid_scan(filepath: str, args) -> HybridReport:
     report = HybridReport(filepath=filepath)
-    
+
     # --- PHASE 1: STATIC ANALYSIS ---
     # In prod: report.static_events = scan_file_full(filepath)
     report.static_events = static_scan_simulation(filepath)
-    
+
     # Check if we should ABORT dynamic scan
     # Policy: If Static Analysis finds a BAN-level threat (e.g. hard strobe logic),
     # we trust it and skip the expensive render.
@@ -6439,7 +6439,7 @@ def run_hybrid_scan(filepath: str, args) -> HybridReport:
     if should_render and args.enable_dynamic:
         dyn_events = scan_dynamic(filepath, args.duration, args.fps)
         report.dynamic_events = dyn_events
-        
+
         if dyn_events:
             report.final_disposition = "FAIL"
         elif report.final_disposition != "FAIL":
@@ -6455,20 +6455,20 @@ def run_hybrid_scan(filepath: str, args) -> HybridReport:
 
 def generate_earl(reports: List[HybridReport]) -> Dict:
     graph = []
-    
+
     # Tool
     graph.append({
         "@id": TOOL_ID,
         "@type": ["earl:Software", "earl:Assertor"],
         "dct:title": "Hybrid Epilepsy Safety Scanner"
     })
-    
+
     for r in reports:
         # Create Assertion
         outcome = "earl:passed" if r.final_disposition == "PASS" else "earl:failed"
-        
+
         all_events = r.static_events + r.dynamic_events
-        
+
         assertion = {
             "@type": "earl:Assertion",
             "earl:assertedBy": TOOL_ID,
@@ -6481,7 +6481,7 @@ def generate_earl(reports: List[HybridReport]) -> Dict:
             }
         }
         graph.append(assertion)
-        
+
     return {"@context": {"earl": "http://www.w3.org/ns/earl#"}, "@graph": graph}
 
 def main():
@@ -6491,20 +6491,20 @@ def main():
     parser.add_argument("--duration", type=int, default=5, help="Render duration in seconds")
     parser.add_argument("--fps", type=int, default=60, help="Simulation FPS")
     parser.add_argument("-o", "--output", default="hybrid_report.jsonld")
-    
+
     args = parser.parse_args()
-    
+
     targets = []
     if os.path.isfile(args.path): targets.append(args.path)
     # Directory logic omitted for brevity
-    
+
     reports = []
     print(f"Scanning {len(targets)} files...")
-    
+
     for t in targets:
         rep = run_hybrid_scan(t, args)
         reports.append(rep)
-        
+
         print(f"[{rep.final_disposition}] {os.path.basename(t)}")
         if rep.dynamic_events:
             print(f"   Dynamic Fail: {rep.dynamic_events[0].context}")
@@ -6526,7 +6526,7 @@ This test suite verifies the **Interaction** between static and dynamic phases.
 ```Python
 import pytest
 from pes_hybrid import (
-    FlashDetector, MockProjectM, run_hybrid_scan, 
+    FlashDetector, MockProjectM, run_hybrid_scan,
     RiskLevel, RiskEvent
 )
 from argparse import Namespace
@@ -6538,20 +6538,20 @@ from argparse import Namespace
 def test_flash_detector_logic():
     # Setup: 60 FPS, Limit 3 flashes/sec
     detector = FlashDetector(fps=60, limit=3)
-    
+
     # 1. Simulate 3 flashes in quick succession (Safe limit)
     # Frame 0: Flash
     res = detector.process_frame(0, 1.0) # Delta 1.0
     assert res is None # 1 flash is safe
-    
+
     # Frame 10: Flash
     res = detector.process_frame(10, 0.0)
     assert res is None # 2 flashes is safe
-    
+
     # Frame 20: Flash
     res = detector.process_frame(20, 1.0)
     assert res is None # 3 flashes is safe
-    
+
     # Frame 30: Flash (The 4th one breaks the limit)
     res = detector.process_frame(30, 0.0)
     assert res is not None
@@ -6560,12 +6560,12 @@ def test_flash_detector_logic():
 
 def test_flash_detector_sliding_window():
     detector = FlashDetector(fps=60, limit=3)
-    
+
     # Burst 3 flashes at start
     detector.process_frame(0, 1.0)
     detector.process_frame(10, 0.0)
     detector.process_frame(20, 1.0)
-    
+
     # Advance time significantly (> 1 sec = 60 frames)
     # Frame 100: Flash (Should be safe because previous ones expired)
     res = detector.process_frame(100, 0.0)
@@ -6580,10 +6580,10 @@ def test_hybrid_pipeline_static_ban_skips_dynamic():
     If static analysis finds a BAN (Hard Strobe), dynamic should NOT run.
     """
     args = Namespace(enable_dynamic=True, duration=5, fps=60)
-    
+
     # Filename 'static_ban' triggers our mock static scanner to return BAN
     report = run_hybrid_scan("tests/static_ban.milk", args)
-    
+
     assert len(report.static_events) == 1
     assert report.static_events[0].risk_level == RiskLevel.BAN
     assert report.final_disposition == "FAIL"
@@ -6595,10 +6595,10 @@ def test_hybrid_pipeline_dynamic_fail():
     If static passes, Dynamic runs. If 'dynamic_fail' logic triggers, report FAIL.
     """
     args = Namespace(enable_dynamic=True, duration=5, fps=60)
-    
+
     # Filename 'dynamic_fail' triggers MockProjectM strobe mode
     report = run_hybrid_scan("tests/dynamic_fail.milk", args)
-    
+
     assert len(report.static_events) == 0 # Static Pass
     assert len(report.dynamic_events) > 0 # Dynamic Fail
     assert report.final_disposition == "FAIL"
@@ -6610,7 +6610,7 @@ def test_hybrid_pipeline_clean_pass():
     """
     args = Namespace(enable_dynamic=True, duration=5, fps=60)
     report = run_hybrid_scan("tests/safe_preset.milk", args)
-    
+
     assert report.final_disposition == "PASS"
     assert len(report.static_events) == 0
     assert len(report.dynamic_events) == 0
@@ -6620,10 +6620,10 @@ def test_cli_args_disable_dynamic():
     If --enable-dynamic is False, dynamic scan should never run.
     """
     args = Namespace(enable_dynamic=False, duration=5, fps=60)
-    
+
     # Even on a file that WOULD fail dynamic
     report = run_hybrid_scan("tests/dynamic_fail.milk", args)
-    
+
     assert report.final_disposition == "PASS" # Passed static, skipped dynamic
     assert len(report.dynamic_events) == 0
 ```
@@ -6876,7 +6876,7 @@ jobs:
     needs: test
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -6996,4 +6996,3 @@ my-repo/
 
 ___
 ###### [top](#table-of-contents)
-

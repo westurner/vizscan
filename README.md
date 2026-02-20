@@ -183,4 +183,3 @@ This project is licensed under the [MIT License](LICENSE).
 *   **Limitation of Liability:** By using this software, you agree that the authors and copyright holders shall not be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
 
 This tool may help content creators reduce risk, but it does not replace professional medical advice or certification.
-

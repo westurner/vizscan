@@ -4,11 +4,11 @@ When writing, reviewing, or documenting code related to photo-epilepsy safety cr
 
 ## Relevant Guidelines to Cite
 
-1. **W3C WCAG 2.1 (Guideline 2.3 Seizures and Physical Reactions):** 
+1. **W3C WCAG 2.1 (Guideline 2.3 Seizures and Physical Reactions):**
    Specifically the "General Flash and Red Flash Thresholds" (no more than 3 general flashes and/or 3 red flashes within any 1-second period).
-2. **ITU-R BT.1702:** 
+2. **ITU-R BT.1702:**
    "Guidance for the reduction of photosensitive epileptic seizures caused by television." Covers flash rates, alternating spatial patterns, and high-contrast transitions.
-3. **Harding FPA (Flash and Pattern Analyzer):** 
+3. **Harding FPA (Flash and Pattern Analyzer):**
    The industry-standard algorithm for measuring luminance changes and spatial patterns in video.
 
 ## Mapping Criteria to Guidelines

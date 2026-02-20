@@ -1,6 +1,7 @@
 """
 vizscan.cli
 """
+
 import os
 import sys
 import json

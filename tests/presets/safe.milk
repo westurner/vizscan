@@ -37,4 +37,3 @@ warp_shader="shader_body {
 comp_shader="shader_body {
     ret = vec3(0.0, 0.0, 1.0); // Solid Blue
 }";
-

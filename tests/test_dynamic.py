@@ -91,7 +91,7 @@ def test_flash_detector_first_flash_time():
     fd.process_frame(15, 1.0)  # Flash 1 at frame 15 (0.25s)
     fd.process_frame(16, 0.0)  # Flash 2 at frame 16
     event = fd.process_frame(17, 1.0)  # Flash 3 at frame 17 (Limit exceeded)
-    
+
     assert event is not None
     assert "starting at 0.25s" in event.context
 
