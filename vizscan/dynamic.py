@@ -63,7 +63,7 @@ class MockProjectM(IRenderer):
 
 class FlashDetector:
     """
-    Harding-Lite Algorithm (based on Harding FPA, ITU-R BT.1702, and W3C WCAG 2.1 General Flash Threshold):
+    Flash detection algorithm (based on ITU-R BT.1702, and W3C WCAG 2.1 General Flash Threshold):
     A general flash is defined as a pair of opposing changes in relative luminance.
     The guideline restricts content to no more than 3 flashes per second.
     Since this algorithm counts individual transitions (>10% luminance change),
@@ -99,7 +99,7 @@ class FlashDetector:
 
         # 3. Check Limit
         current_rate = len(self.flash_timestamps)
-        # Note: Harding is 3 flashes (6 transitions) per second.
+        # Note: ITU-R BT.1702 is 3 flashes (6 transitions) per second.
 
         if current_rate > self.limit:
             first_flash_time = self.flash_timestamps[0] / self.fps

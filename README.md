@@ -13,7 +13,7 @@ It tries to detect patterns, frequencies, and render outputs that pose a high ri
 It utilizes static, taint, and dynamic analysis methods to try to predict risk:
 
 1.  **Static Taint Analysis (AST):** Parses CPU (NSEL) and GPU (Shader) code to detect dangerous logic (e.g., hard strobes, high-frequency math).
-2.  **Dynamic Render Analysis:** Simulates the rendering pipeline to detect flash rates exceeding **3 Hz** (Harding FPA standard).
+2.  **Dynamic Render Analysis:** Simulates the rendering pipeline to detect flash rates exceeding **3 Hz** (ITU-R BT.1702).
 
 ## 📦 Installation
 
@@ -89,7 +89,7 @@ math) and GLSL (Shaders). We perform Taint Propagation to track dangerous values
 If a preset passes static checks, the Dynamic Engine simulates a render loop
 (Mock or Headless ProjectM).
 
-• Algorithm: Harding-Lite Sliding Window.
+• Algorithm: ITU-Compliant Sliding Window.
 • Threshold: >10% Luminance change between frames.
 • Limit: Max 3 flashes per rolling 1-second window.
 
@@ -105,7 +105,8 @@ REGISTRY.register(
     "My Rule Name",       # Human-readable name
     "Description of risk",# Description
     50,                   # Base score (higher = riskier)
-    RiskLevel.WARNING     # Risk Level (INFO, WARNING, CRITICAL, BAN)
+    RiskLevel.WARNING,    # Risk Level (INFO, WARNING, CRITICAL, BAN)
+    [Reason('a', '//a.html')]  # Reason (Reason(name=, url=))
 )
 ```
 
@@ -169,6 +170,32 @@ You can automate safety scanning in your repository using GitHub Actions. This e
   run: vizscan ./my_presets --recursive --enable-dynamic --output report.jsonld
 ```
 
+## Relevant Guidelines
+
+1. **ITU-R BT.1702:**  
+   https://www.itu.int/rec/R-REC-BT.1702/en  
+   "Guidance for the reduction of photosensitive epileptic seizures caused by television." Covers flash rates, alternating spatial patterns, and high-contrast transitions.
+2. **W3C WCAG 2.1 (Guideline 2.3 Seizures and Physical Reactions):**  
+  https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold  
+   Specifically the "General Flash and Red Flash Thresholds" (no more than 3 general flashes and/or 3 red flashes within any 1-second period).
+
+## Limitations
+- Layered compositions, Low level video:
+- This tool cannot assess layered presets: when two presets are displayed concurrently as with a preset transition duration or Milkdrop3's multi-preset feature.
+- This tool cannot assess regular video streams.
+- This tool cannot assess low-level GPU-composited video.
+- This tool cannot take an e.g. HDMI signal as input and return an HDMI output signal that's risk-limited or risk-annotated.
+
+## Other solutions
+
+- **Photosensitive Epilepsy Analysis Tool (PEAT):**  
+  https://trace.umd.edu/peat/  
+  - https://trace.umd.edu/information-about-photosensitive-seizure-disorders/
+- **Harding FPA (Flash and Pattern Analyzer):**
+  https://www.hardingfpa.com/hardingfpa-for-broadcast/broadcast-industry/  
+  An industry-standard algorithm for measuring luminance changes and spatial patterns in video.
+
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
@@ -177,7 +204,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 **This software is NOT a medical device and is NOT intended to be used as a medical therapy.**
 
-`vizscan` is an analysis tool designed to detect visual patterns commonly associated with photosensitive epilepsy triggers (such as Harding FPA guidelines). However, it cannot guarantee safety.
+`vizscan` is an analysis tool designed to detect visual patterns commonly associated with photosensitive epilepsy triggers. However, it cannot guarantee safety.
 
 *   **No Warranty of Fitness:** As stated in the MIT License, this software is provided "AS IS", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability or fitness for a particular purpose.
 *   **Limitation of Liability:** By using this software, you agree that the authors and copyright holders shall not be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
