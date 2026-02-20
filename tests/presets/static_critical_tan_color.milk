@@ -1,0 +1,4 @@
+// Tangent Color Drive (CRITICAL)
+// Expect: TanColor=1
+// Logic: tan() on color variables risks white-out flashes
+ob_r = tan(time);

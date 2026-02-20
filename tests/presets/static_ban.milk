@@ -1,0 +1,13 @@
+// Inverter Strobe (BAN)
+// Logic: val = 1 - val creates a 30Hz strobe at 60fps
+// Expect: InverterStrobe=4
+ob_r = 1 - ob_r;
+
+// Another color channel
+ob_g = 1 - ob_g;
+
+// Wave color strobe
+wave_r = 1 - wave_r;
+
+// Variable strobe
+my_var = 1 - my_var;

@@ -1,0 +1,4 @@
+// High Frequency Oscillation (WARNING)
+// Expect: HighFreqOsc=1
+// Logic: Oscillation > 3Hz (approx 18 rad/s)
+val = sin(time * 20);

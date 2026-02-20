@@ -1,0 +1,43 @@
+name: Scan Visualization Presets for Safety
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'presets/**.milk'  # Only run if presets change
+  workflow_dispatch:        # Allow manual triggering
+
+jobs:
+  safety-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install PES Scanner
+      run: |
+        pip install .
+
+    - name: Run full vizscan
+      # Adjust arguments as needed:
+      # --recursive: Scan subfolders
+      # --enable-dynamic: Run the render simulation
+      # --output: Save report to specific file
+      run: |
+        vizscan ./presets --recursive --enable-dynamic --output safety_report.jsonld
+
+    - name: Check for Failures
+      if: failure()
+      run: |
+        echo "::error::Epilepsy triggers detected! Check the artifact report."
+
+    - name: Upload Safety Report
+      if: always() # Upload report even if scan fails
+      uses: actions/upload-artifact@v3
+      with:
+        name: safety-report
+        path: safety_report.jsonld

@@ -1,0 +1,4 @@
+// Tangent Motion Drive (WARNING)
+// Expect: TanMotion=1
+// Logic: tan() on geometry variables risks disorientation
+rot = tan(time);

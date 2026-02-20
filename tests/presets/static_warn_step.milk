@@ -1,0 +1,14 @@
+// Step Function (WARNING)
+// Expect: StepFunction=4
+// Logic: step/fract/ceil/floor on time-dependent vars creates hard edges
+x = time;
+y = step(x);
+
+// Fract example
+z = fract(time);
+
+// Ceil example
+w = ceil(time * 0.5);
+
+// Floor example
+v = floor(time + 0.1);

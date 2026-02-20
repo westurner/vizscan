@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vizscan"
+version = "0.0.1"
+description = "Hybrid Static/Dynamic Analysis tool for detecting photosensitive seizure triggers in ProjectM/MilkDrop presets."
+readme = "README.md"
+authors = [
+  { name = "PES Maintainers", email = "safety@projectm.org" },
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["epilepsy", "accessibility", "static-analysis", "glsl", "milkdrop", "earl"]
+dependencies = [
+    "rich>=10.0.0",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black",
+    "mypy"
+]
+
+[project.scripts]
+vizscan = "vizscan.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/projectM-visualizer/pes-scanner"
+"Bug Tracker" = "https://github.com/projectM-visualizer/pes-scanner/issues"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

@@ -1,0 +1,40 @@
+
+// Safe Arithmetic
+x = 1 + 2;
+y = x * 3;
+
+// Safe Frequency (Low Hz)
+// 2.0 is well below the 18.0 threshold (approx 3Hz)
+val = sin(time * 2.0);
+val2 = cos(time * 0.5);
+
+// Safe Modulo
+// Modulo > 4 is considered safe (slower flickering)
+slow_strobe = frame % 100;
+
+// Constant Color Assignment
+ob_r = 0.5;
+ob_g = 0.0;
+ob_b = 1.0;
+
+// Safe Arithmetic (Not Inverter Strobe)
+// Inverter strobe is 'x = 1 - x'
+// This is just subtraction
+val3 = 1.0 - 0.5;
+val4 = val3 - 0.1;
+
+// Texture Coordinates (UV)
+// Usually safe unless heavily distorted
+uv_x = uv_x + 0.01;
+
+// Safe Shader Code
+// Basic texture lookup and color assignment
+warp_shader="shader_body {
+    ret = texture2D(sampler_main, uv).xyz;
+    ret = ret * 0.99; // Darken slightly
+}";
+
+comp_shader="shader_body {
+    ret = vec3(0.0, 0.0, 1.0); // Solid Blue
+}";
+

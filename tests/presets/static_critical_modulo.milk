@@ -1,0 +1,4 @@
+// Frame Modulo Flickering (CRITICAL)
+// Expect: FrameModulo=1
+// Logic: frame % N where N < 4 causes rapid flickering
+f = frame % 2;
