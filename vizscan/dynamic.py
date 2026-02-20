@@ -63,7 +63,7 @@ class MockProjectM(IRenderer):
 
 class FlashDetector:
     """
-    Harding-Lite Algorithm (based on ITU-R BT.1702 / W3C WCAG 2.1):
+    Harding-Lite Algorithm (based on Harding FPA, ITU-R BT.1702, and W3C WCAG 2.1 General Flash Threshold):
     A general flash is defined as a pair of opposing changes in relative luminance.
     The guideline restricts content to no more than 3 flashes per second.
     Since this algorithm counts individual transitions (>10% luminance change),
@@ -107,7 +107,7 @@ class FlashDetector:
                 rule_id="DynamicStrobe",
                 risk_level=RiskLevel.CRITICAL,
                 score=100,
-                context=f"Measured {current_rate} flashes/sec (Limit {self.limit})",
+                context=f"Measured {current_rate} flashes/sec (Limit {self.limit}). Violates Harding FPA and WCAG 2.1 General Flash Threshold (> 3 flashes / 6 transitions per second).",
                 line=0,
                 variables=["screen_luminance"],
                 source_type="Dynamic",

@@ -41,20 +41,29 @@ class RiskEvent:
 
 
 @dataclass
+class Reason:
+    name: str
+    url: str
+
+
+@dataclass
 class RuleDefinition:
     id: str
     name: str
     description: str
     base_score: int
     level: RiskLevel
+    reasons: List[Reason] = field(default_factory=list)
 
 
 class SafetyRegistry:
     def __init__(self):
         self.rules = {}
 
-    def register(self, r_id, name, desc, score, level):
-        self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level)
+    def register(self, r_id, name, desc, score, level, reasons=None):
+        if reasons is None:
+            reasons = []
+        self.rules[r_id] = RuleDefinition(r_id, name, desc, score, level, reasons)
 
     def create_event(self, rule_id, context, line, vars, src_type="CPU"):
         if rule_id not in self.rules:
@@ -70,6 +79,7 @@ class SafetyRegistry:
                 "dct:description": r.description,
                 "pes:score": r.base_score,
                 "pes:level": r.level,
+                "pes:reasons": [{"name": reason.name, "url": reason.url} for reason in r.reasons]
             }
             for r in self.rules.values()
         ]
@@ -77,16 +87,28 @@ class SafetyRegistry:
 
 REGISTRY = SafetyRegistry()
 REGISTRY.register(
-    "InverterStrobe", "Hard Strobe", "val = 1 - val (30Hz strobe)", 150, RiskLevel.BAN
+    "InverterStrobe", "Hard Strobe", "val = 1 - val (30Hz strobe)", 150, RiskLevel.BAN,
+    reasons=[Reason(name="ITU-R BT.1702 (rapid alternating light/dark frames exceeding safe flash threshold)", url="https://www.itu.int/rec/R-REC-BT.1702/en")]
 )
 REGISTRY.register(
-    "FrameModulo", "Frame Modulo", "frame % N (Rapid flicker)", 100, RiskLevel.CRITICAL
+    "FrameModulo", "Frame Modulo", "frame % N (Rapid flicker)", 100, RiskLevel.CRITICAL,
+    reasons=[
+        Reason(name="ITU-R BT.1702", url="https://www.itu.int/rec/R-REC-BT.1702/en"),
+        Reason(name="WCAG 2.1 General Flash Threshold (>3Hz)", url="https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold")
+    ]
 )
 REGISTRY.register(
-    "HighFreqOsc", "High Frequency", "Oscillation > 3Hz", 40, RiskLevel.WARNING
+    "HighFreqOsc", "High Frequency", "Oscillation > 3Hz", 40, RiskLevel.WARNING,
+    reasons=[
+        Reason(name="ITU-R BT.1702", url="https://www.itu.int/rec/R-REC-BT.1702/en"),
+        Reason(name="WCAG 2.1 General Flash Threshold", url="https://www.w3.org/TR/WCAG21/#three-flashes-or-below-threshold"),
+    ]
 )
 REGISTRY.register(
-    "TanColor", "Tangent Color", "Tan() on color (Flash Risk)", 60, RiskLevel.CRITICAL
+    "TanColor", "Tangent Color", "Tan() on color (Flash Risk)", 60, RiskLevel.CRITICAL,
+    reasons=[
+        Reason(name="ITU-R BT.1702 (high-contrast luminance transitions)", url="https://www.itu.int/rec/R-REC-BT.1702/en")
+    ]
 )
 REGISTRY.register(
     "TanMotion",
@@ -94,6 +116,7 @@ REGISTRY.register(
     "Tan() on geometry (Disorientation Risk)",
     30,
     RiskLevel.WARNING,
+    reasons=[Reason(name="ITU-R BT.1702 (provocative spatial patterns and disorientation)", url="https://www.itu.int/rec/R-REC-BT.1702/en")]
 )
 REGISTRY.register(
     "StepFunction",
@@ -101,6 +124,7 @@ REGISTRY.register(
     "Step/Fract function creating instant on/off",
     50,
     RiskLevel.WARNING,
+    reasons=[Reason(name="ITU-R BT.1702 (high-contrast luminance transitions)", url="https://www.itu.int/rec/R-REC-BT.1702/en")]
 )
 
 # ==========================================
@@ -444,6 +468,8 @@ class SafetyAnalyzer:
 
             if node.name in ["sin", "cos"]:
                 if primary.freq > 18.0:
+                    # HighFreqOsc: 18 rad/s is ~2.86 Hz, approaching the 3Hz limit.
+                    # Cite WCAG 2.1 General Flash Threshold and ITU-R BT.1702.
                     self.events.append(
                         REGISTRY.create_event(
                             "HighFreqOsc",
@@ -460,6 +486,8 @@ class SafetyAnalyzer:
 
             if node.name in ["step", "fract", "ceil", "floor"]:
                 if primary.is_time_dep:
+                    # StepFunction: Creates instant on/off hard edges in time, leading to infinite-contrast flashes.
+                    # Cite ITU-R BT.1702 regarding high-contrast luminance transitions.
                     self.events.append(
                         REGISTRY.create_event(
                             "StepFunction",
@@ -482,6 +510,8 @@ class SafetyAnalyzer:
         expr_state = self.visit(node.expr)
 
         # Inverter Strobe: x = 1 - x
+        # Creates a guaranteed 30Hz strobe (at 60fps).
+        # Cite ITU-R BT.1702 regarding rapid alternating light/dark frames exceeding the safe flash threshold.
         if isinstance(node.expr, BinaryOp) and node.expr.op == "-":
             # Check if right side is the target variable
             if (
@@ -499,6 +529,8 @@ class SafetyAnalyzer:
                 )
 
         # Frame Modulo
+        # Creates rapid flickering.
+        # Cite ITU-R BT.1702 and WCAG 2.1 General Flash Threshold (exceeds 3Hz).
         if isinstance(node.expr, BinaryOp) and node.expr.op == "%":
             if isinstance(node.expr.right, Literal) and node.expr.right.value < 4:
                 self.events.append(
@@ -512,6 +544,8 @@ class SafetyAnalyzer:
                 )
 
         # Tan Color
+        # Tangent functions approach infinity, causing sudden, extreme high-contrast whiteouts.
+        # Cite ITU-R BT.1702 regarding high-contrast luminance transitions and WCAG 2.1.
         if node.target in self.COLOR_VARS:
             if expr_state.source == "tan":
                 self.events.append(
@@ -525,6 +559,8 @@ class SafetyAnalyzer:
                 )
 
         # Tan Motion
+        # Causes extreme, sudden spatial jumps.
+        # Cite ITU-R BT.1702 regarding provocative spatial patterns and disorientation.
         if node.target in self.MOTION_VARS:
             if expr_state.source == "tan":
                 self.events.append(
