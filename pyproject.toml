@@ -41,8 +41,8 @@ dev = [
 vizscan = "vizscan.cli:main"
 
 [project.urls]
-"Homepage" = "https://github.com/projectM-visualizer/pes-scanner"
-"Bug Tracker" = "https://github.com/projectM-visualizer/pes-scanner/issues"
+"Homepage" = "https://github.com/westurner/vizscan"
+"Bug Tracker" = "https://github.com/westurner/vizscan"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
