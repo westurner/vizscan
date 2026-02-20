@@ -46,7 +46,7 @@ vizscan = "vizscan.cli:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q"
+addopts = "-ra -q --cov=vizscan --cov-report=term-missing"
 testpaths = [
     "tests",
 ]
