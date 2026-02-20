@@ -63,11 +63,14 @@ class MockProjectM(IRenderer):
 
 class FlashDetector:
     """
-    Harding-Lite Algorithm:
-    Detects if luminance changes > 10% more than 3 times in 1 second.
+    Harding-Lite Algorithm (based on ITU-R BT.1702 / W3C WCAG 2.1):
+    A general flash is defined as a pair of opposing changes in relative luminance.
+    The guideline restricts content to no more than 3 flashes per second.
+    Since this algorithm counts individual transitions (>10% luminance change),
+    the limit is set to 6 transitions (3 full flashes) per 1-second window.
     """
 
-    def __init__(self, fps=60, limit=3):
+    def __init__(self, fps=60, limit=6):
         self.fps = fps
         self.limit = limit
         self.history: Deque[float] = deque(maxlen=fps)  # 1 second window
