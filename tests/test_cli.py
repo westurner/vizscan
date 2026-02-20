@@ -99,3 +99,20 @@ def test_hybrid_main_invalid_file(capsys):
         main()
     captured = capsys.readouterr()
     assert "Scanning 0 files..." in captured.out
+
+def test_hybrid_cli_exception(tmp_path, capsys):
+    p = tmp_path / "test.milk"
+    p.write_text("ob_r = 0.5;")
+    with patch("vizscan.cli.run_hybrid_scan", side_effect=Exception("Test Error")):
+        with patch.object(sys, "argv", ["vizscan/cli.py", str(p)]):
+            main()
+    captured = capsys.readouterr()
+    assert "-> ERROR: Test Error" in captured.out
+
+def test_hybrid_cli_fail_exit(tmp_path, capsys):
+    p = tmp_path / "test.milk"
+    p.write_text("ob_r = 1 - ob_r;") # This should trigger InverterStrobe and FAIL
+    with patch.object(sys, "argv", ["vizscan/cli.py", str(p)]):
+        with pytest.raises(SystemExit) as e:
+            main()
+        assert e.value.code == 1

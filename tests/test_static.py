@@ -95,6 +95,28 @@ def test_lexer_swizzling():
     assert [t.type for t in tokens] == ["ID", "DOT", "ID"]
 
 
+def test_lexer_mismatch():
+    code = "x = @;"  # @ is invalid
+    lexer = MilkLexer(code)
+    tokens = lexer.tokenize()
+    # Should skip @ and tokenize ;
+    assert (
+        len(tokens) == 4
+    )  # ID, ASSIGN, SEMICOLON (SKIP is ignored) -> Wait, @ is skipped
+    # x, =, ; -> 3 tokens
+    types = [t.type for t in tokens]
+    assert "ID" in types
+    assert "ASSIGN" in types
+    assert "SEMICOLON" in types
+
+
+def test_lexer_mismatch2():
+    code = "float x = 1.0; @"
+    lexer = MilkLexer(code)
+    tokens = lexer.tokenize()
+    assert tokens[-1].type == "SEMICOLON"
+
+
 # ==========================================
 # 2. PARSER TESTS
 # ==========================================
@@ -111,6 +133,14 @@ def test_parser_variable_declaration():
     assert stmt.target == "x"
 
 
+def test_parser_block_invalid_stmt():
+    code = "{ + }"
+    parser = MilkParser(MilkLexer(code).tokenize())
+    program = parser.parse()
+    block = program.statements[0]
+    assert isinstance(block, Block)
+    assert len(block.statements) == 0
+
 def test_parser_block():
     code = "{ x = 1.0; }"
     parser = MilkParser(MilkLexer(code).tokenize())
@@ -119,30 +149,43 @@ def test_parser_block():
     block = program.statements[0]
     assert isinstance(block, Block)
 
+def test_parser_parens():
+    code = "x = (1 + 2);"
+    lexer = MilkLexer(code)
+    parser = MilkParser(lexer.tokenize())
+    stmt = parser.parse_statement()
+    assert isinstance(stmt, Assignment)
+    assert isinstance(stmt.expr, BinaryOp)
+    assert stmt.expr.op == "+"
 
-# --- PES SHADER SCANNER COVERAGE ---
+def test_taint_member_access():
+    code = "x = y.z;"
+    lexer = MilkLexer(code)
+    parser = MilkParser(lexer.tokenize())
+    stmt = parser.parse_statement()
+    # print(f"Parsed statement: {stmt}")
+    analyzer = SafetyAnalyzer()
+    analyzer.analyze(stmt)
 
 
 def test_registry_unknown_rule():
     reg = SafetyRegistry()
     event = reg.create_event("UnknownRule", "ctx", 1, [])
+    assert event.rule_id == "UnknownRule"
     assert event.risk_level == RiskLevel.INFO
+    assert event.score == 0
 
 
-def test_lexer_mismatch():
-    code = "x = @;"  # @ is invalid
-    lexer = MilkLexer(code)
-    tokens = lexer.tokenize()
-    # Should skip @ and tokenize ;
-    assert (
-        len(tokens) == 4
-    )  # ID, ASSIGN, SEMICOLON (SKIP is ignored) -> Wait, @ is skipped
-    # x, =, ; -> 3 tokens
-    types = [t.type for t in tokens]
-    assert "ID" in types
-    assert "ASSIGN" in types
-    assert "SEMICOLON" in types
+def test_registry_register_no_reasons():
+    reg = SafetyRegistry()
+    reg.register("TestRule", "Test", "Desc", 10, RiskLevel.INFO)
+    assert "TestRule" in reg.rules
+    assert reg.rules["TestRule"].reasons == []
 
+
+def test_parser_consume_eof():
+    parser = MilkParser([])
+    assert parser.consume() is None
 
 def test_parser_consume_mismatch():
     tokens = MilkLexer("x = 1;").tokenize()
