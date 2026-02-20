@@ -1,23 +1,11 @@
+"""
+test_cli.py
+"""
 import sys
 from unittest.mock import patch
+
 import pytest
-from vizscan.cli import (
-    main,
-)
-
-# --- PES HYBRID COVERAGE ---
-
-
-class MockArgsExtended:
-    def __init__(self, enable_dynamic=False, duration=5, fps=60, score_quality=False):
-        self.enable_dynamic = enable_dynamic
-        self.duration = duration
-        self.fps = fps
-        self.score_quality = score_quality
-        self.path = ""
-        self.recursive = False
-        self.help_scoring = False
-        self.output = ""
+from vizscan.cli import main
 
 
 def test_hybrid_cli_help(capsys):
@@ -100,6 +88,7 @@ def test_hybrid_main_invalid_file(capsys):
     captured = capsys.readouterr()
     assert "Scanning 0 files..." in captured.out
 
+
 def test_hybrid_cli_exception(tmp_path, capsys):
     p = tmp_path / "test.milk"
     p.write_text("ob_r = 0.5;")
@@ -108,6 +97,7 @@ def test_hybrid_cli_exception(tmp_path, capsys):
             main()
     captured = capsys.readouterr()
     assert "-> ERROR: Test Error" in captured.out
+
 
 def test_hybrid_cli_fail_exit(tmp_path, capsys):
     p = tmp_path / "test.milk"
