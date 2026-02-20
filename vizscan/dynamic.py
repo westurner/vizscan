@@ -100,17 +100,18 @@ class FlashDetector:
         # 3. Check Limit
         current_rate = len(self.flash_timestamps)
         # Note: Harding is 3 flashes (6 transitions) per second.
-        # Simplified here to 3 transitions > 10% for demo.
 
         if current_rate > self.limit:
+            first_flash_time = self.flash_timestamps[0] / self.fps
             return RiskEvent(
                 rule_id="DynamicStrobe",
                 risk_level=RiskLevel.CRITICAL,
                 score=100,
-                context=f"Measured {current_rate} flashes/sec (Limit {self.limit}). Violates Harding FPA and WCAG 2.1 General Flash Threshold (> 3 flashes / 6 transitions per second).",
+                context=f"Measured {current_rate} flashes/sec (Limit {self.limit}) starting at {first_flash_time:.2f}s",
                 line=0,
                 variables=["screen_luminance"],
                 source_type="Dynamic",
+                timecode=first_flash_time,
             )
         return None
 

@@ -38,6 +38,7 @@ class RiskEvent:
     line: int
     variables: List[str]
     source_type: str = "CPU"  # 'CPU' or 'GPU'
+    timecode: Optional[float] = None
 
 
 @dataclass
