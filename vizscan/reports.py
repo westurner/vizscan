@@ -30,16 +30,29 @@ def generate_earl(reports: List[HybridReport]) -> Dict:
     for r in reports:
         outcome = "earl:passed" if r.final_disposition == "PASS" else "earl:failed"
 
+        errors = []
+        for e in r.static_events + r.dynamic_events:
+            errors.append({
+                "pes:rule": e.rule_id,
+                "pes:level": e.risk_level.value,
+                "dct:description": e.context,
+                "pes:line": e.line
+            })
+
+        result = {
+            "@type": "earl:TestResult",
+            "earl:outcome": outcome,
+            "pes:staticErrors": len(r.static_events),
+            "pes:dynamicErrors": len(r.dynamic_events),
+        }
+        if errors:
+            result["pes:errors"] = errors
+
         assertion = {
             "@type": "earl:Assertion",
             "earl:assertedBy": TOOL_ID,
             "earl:subject": {"@id": f"file://{r.filepath}"},
-            "earl:result": {
-                "@type": "earl:TestResult",
-                "earl:outcome": outcome,
-                "pes:staticErrors": len(r.static_events),
-                "pes:dynamicErrors": len(r.dynamic_events),
-            },
+            "earl:result": result,
         }
         graph.append(assertion)
 
