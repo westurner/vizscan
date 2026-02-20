@@ -1,4 +1,3 @@
-import pytest
 import sys
 from unittest.mock import patch
 from vizscan.static import (
@@ -11,9 +10,9 @@ from vizscan.static import (
     FunctionCall,
     Block,
     Program,
-    RiskEvent,
     SafetyRegistry,
     RiskLevel,
+    RiskEvent,
     scan_file_full,
     parse_metadata,
     Literal,
@@ -26,6 +25,46 @@ from vizscan.static import (
 # ==========================================
 # 1. LEXER TESTS
 # ==========================================
+
+
+def test_token_dataclass():
+    t = Token("ID", "my_var", 10)
+    assert t.type == "ID"
+    assert t.value == "my_var"
+    assert t.line == 10
+
+
+def test_riskevent_dataclass():
+    event = RiskEvent(
+        rule_id="TestRule",
+        risk_level=RiskLevel.WARNING,
+        score=50,
+        context="Test context",
+        line=42,
+        variables=["x", "y"],
+        source_type="GPU",
+        timecode=1.23,
+    )
+    assert event.rule_id == "TestRule"
+    assert event.risk_level == RiskLevel.WARNING
+    assert event.score == 50
+    assert event.context == "Test context"
+    assert event.line == 42
+    assert event.variables == ["x", "y"]
+    assert event.source_type == "GPU"
+    assert event.timecode == 1.23
+
+    # Test defaults
+    event_default = RiskEvent(
+        rule_id="TestRule2",
+        risk_level=RiskLevel.INFO,
+        score=10,
+        context="Test context 2",
+        line=1,
+        variables=[],
+    )
+    assert event_default.source_type == "CPU"
+    assert event_default.timecode is None
 
 
 def test_lexer_types_and_blocks():
