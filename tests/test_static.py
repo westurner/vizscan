@@ -114,7 +114,7 @@ def test_lexer_mismatch2():
     code = "float x = 1.0; @"
     lexer = MilkLexer(code)
     tokens = lexer.tokenize()
-    assert tokens[-1].type == "SEMICOLON"
+    assert tokens[-1].type == "MISMATCH"
 
 
 # ==========================================
