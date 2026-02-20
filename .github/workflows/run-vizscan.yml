@@ -3,8 +3,8 @@ name: Scan Visualization Presets for Safety
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'presets/**.milk'  # Only run if presets change
+    #paths:
+    #  - 'tests/presets/**.milk'  # Only run if presets change
   workflow_dispatch:        # Allow manual triggering
 
 jobs:
@@ -16,9 +16,9 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
+        python-version: "3.14"
 
-    - name: Install PES Scanner
+    - name: Install vizscan
       run: |
         pip install .
 
@@ -28,7 +28,7 @@ jobs:
       # --enable-dynamic: Run the render simulation
       # --output: Save report to specific file
       run: |
-        vizscan ./presets --recursive --enable-dynamic --output safety_report.jsonld
+        vizscan ./tests/presets --recursive --enable-dynamic --output safety_report.jsonld
 
     - name: Check for Failures
       if: failure()
