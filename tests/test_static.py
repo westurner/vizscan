@@ -189,19 +189,18 @@ def test_scanner_main_execution(tmp_path, capsys):
     p = tmp_path / "test.milk"
     p.write_text("ob_r = 0.5;")
 
-    # We need to import the module dynamically or use runpy to execute the main block
-    import runpy
+    from vizscan.static import main
 
     # Mock sys.argv
     with patch.object(sys, "argv", ["vizscan/static.py", str(p)]):
-        runpy.run_module("vizscan.static", run_name="__main__")
+        main()
 
     captured = capsys.readouterr()
     # Should print nothing for safe file, or we can add a violation
 
     p.write_text("ob_r = 1 - ob_r;")  # BAN
     with patch.object(sys, "argv", ["vizscan/static.py", str(p)]):
-        runpy.run_module("vizscan.static", run_name="__main__")
+        main()
     captured = capsys.readouterr()
     assert "RiskLevel.BAN" in captured.out
 
@@ -318,10 +317,10 @@ def test_scanner_main_quality_output(tmp_path, capsys):
     p = tmp_path / "test.milk"
     p.write_text("ob_r = 0.0; ob_g = 0.0; ob_b = 0.0;")
 
-    import runpy
+    from vizscan.static import main
 
     with patch.object(sys, "argv", ["vizscan/static.py", str(p)]):
-        runpy.run_module("vizscan.static", run_name="__main__")
+        main()
     captured = capsys.readouterr()
     assert "Quality Report:" in captured.out
     assert "Dark Background" in captured.out
@@ -343,10 +342,10 @@ def test_extract_shaders_multiple():
 
 
 def test_scanner_main_invalid_file(capsys):
-    import runpy
+    from vizscan.static import main
 
     with patch.object(sys, "argv", ["vizscan/static.py", "nonexistent.milk"]):
-        runpy.run_module("vizscan.static", run_name="__main__")
+        main()
     captured = capsys.readouterr()
     # Should print nothing or error? Code checks os.path.isfile
     assert captured.out == ""

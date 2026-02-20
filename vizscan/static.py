@@ -687,7 +687,7 @@ def scan_file_full(
     return all_events, metadata, quality_report
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("path", help="File to scan")
     args = parser.parse_args()
@@ -700,3 +700,6 @@ if __name__ == "__main__":
         print("\nQuality Report:")
         print(f"  Background: {quality.background_type}")
         print(f"  Attributes: {', '.join(quality.attributes)}")
+
+if __name__ == "__main__":
+    main()

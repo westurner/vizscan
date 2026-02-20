@@ -81,7 +81,7 @@ def test_hybrid_cli_score_quality(tmp_path, capsys):
     p.write_text("ob_r = 0.5;")
 
     with patch.object(sys, "argv", ["vizscan/cli.py", str(p), "--score-quality"]):
-        runpy.run_module("vizscan.cli", run_name="__main__")
+        main()
     captured = capsys.readouterr()
     assert "Quality (Static)" in captured.out
 
@@ -91,13 +91,13 @@ def test_hybrid_main_execution(tmp_path, capsys):
     p.write_text("ob_r = 0.5;")
 
     with patch.object(sys, "argv", ["vizscan/cli.py", str(p)]):
-        runpy.run_module("vizscan.cli", run_name="__main__")
+        main()
     captured = capsys.readouterr()
     assert "[PASS]" in captured.out
 
 
 def test_hybrid_main_invalid_file(capsys):
     with patch.object(sys, "argv", ["vizscan/cli.py", "nonexistent.milk"]):
-        runpy.run_module("vizscan.cli", run_name="__main__")
+        main()
     captured = capsys.readouterr()
     assert "Scanning 0 files..." in captured.out
