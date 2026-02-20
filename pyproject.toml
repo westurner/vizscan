@@ -50,3 +50,10 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[tool.bandit]
+skips = ["B105"]
+# B105: Hardcoded password (due to FP on 'SKIP' and 'COMMENT')
+
+[tool.bandit.assert_used]
+skips = ['*_test.py', '*/test_*.py']
