@@ -8,7 +8,7 @@ version = "0.0.1"
 description = "Hybrid Static/Dynamic Analysis tool for detecting photosensitive seizure triggers in ProjectM/MilkDrop presets."
 readme = "README.md"
 authors = [
-  { name = "PES Maintainers", email = "safety@projectm.org" },
+  { name = "", email = "" },
 ]
 license = { text = "MIT" }
 classifiers = [
